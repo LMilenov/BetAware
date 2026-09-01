@@ -427,3 +427,21 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# ========================================
+# BetAware - Local Development Secrets
+# ========================================
+
+# ASP.NET Core local development configuration
+API/appsettings.Development.json
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Angular build output
+client/dist/
+
+# Angular cache
+client/.angular/cache/
