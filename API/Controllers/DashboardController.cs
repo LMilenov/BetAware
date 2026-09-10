@@ -1,20 +1,23 @@
 using System.Security.Claims;
-using API.Data;
 using API.DTOs.Dashboard;
 using API.Enums;
+using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class DashboardController(AppDbContext context) : ControllerBase
+public class DashboardController(IDashboardService dashboardService) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetDashboard()
+    public async Task<IActionResult> GetDashboard(
+        DateTime? startDate,
+        DateTime? endDate,
+        TransactionType? type,
+        GamblingCategory? category)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -23,26 +26,46 @@ public class DashboardController(AppDbContext context) : ControllerBase
             return Unauthorized();
         }
 
-        var transactions = await context.GamblingTransactions
-            .Where(x => x.UserId == userId)
-            .ToListAsync();
-
-        var totalWon = transactions
-            .Where(x => x.Type == TransactionType.Win)
-            .Sum(x => x.Amount);
-
-        var totalLost = transactions
-            .Where(x => x.Type == TransactionType.Loss)
-            .Sum(x => x.Amount);
-
-        var dashboard = new DashboardDto
-        {
-            TotalTransactions = transactions.Count,
-            TotalWon = totalWon,
-            TotalLost = totalLost,
-            NetResult = totalWon - totalLost
-        };
+        var dashboard = await dashboardService.GetDashboardAsync(
+            userId,
+            startDate,
+            endDate,
+            type,
+            category
+        );
 
         return Ok(dashboard);
+    }
+
+    [HttpGet("monthly")]
+    public async Task<IActionResult> GetMonthlyStatistics()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        var statistics =
+            await dashboardService.GetMonthlyStatisticsAsync(userId);
+
+        return Ok(statistics);
+    }
+
+    [HttpGet("categories")]
+    public async Task<IActionResult> GetCategoryStatistics()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        var statistics =
+            await dashboardService.GetCategoryStatisticsAsync(userId);
+
+        return Ok(statistics);
     }
 }

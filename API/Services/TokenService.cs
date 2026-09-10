@@ -3,13 +3,14 @@ using System.Security.Claims;
 using System.Text;
 using API.Entities;
 using API.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
 namespace API.Services;
 
-public class TokenService(IConfiguration configuration) : ITokenService
+public class TokenService(IConfiguration configuration,UserManager<AppUser> userManager) : ITokenService
 {
-    public string CreateToken(AppUser user)
+    public async Task<string> CreateToken(AppUser user)
     {
         var claims = new List<Claim>
         {
@@ -17,6 +18,15 @@ public class TokenService(IConfiguration configuration) : ITokenService
             new(ClaimTypes.Email, user.Email ?? string.Empty),
             new(ClaimTypes.Name, user.UserName ?? string.Empty)
         };
+
+        var roles = await userManager.GetRolesAsync(user);
+
+        foreach (var role in roles)
+        {
+            claims.Add(
+                new Claim(ClaimTypes.Role, role)
+            );
+        }
 
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(
@@ -40,7 +50,9 @@ public class TokenService(IConfiguration configuration) : ITokenService
 
         var tokenHandler = new JwtSecurityTokenHandler();
 
-        var token = tokenHandler.CreateToken(tokenDescriptor);
+        var token = tokenHandler.CreateToken(
+            tokenDescriptor
+        );
 
         return tokenHandler.WriteToken(token);
     }

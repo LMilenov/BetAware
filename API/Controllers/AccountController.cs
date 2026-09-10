@@ -53,7 +53,7 @@ public class AccountController(UserManager<AppUser> userManager, ITokenService t
             return Unauthorized("Invalid email or password");
         }
 
-        var token = tokenService.CreateToken(user);
+        var token = await tokenService.CreateToken(user);
 
         return Ok(new
         {

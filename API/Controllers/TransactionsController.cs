@@ -49,7 +49,7 @@ public class TransactionsController(AppDbContext context) : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetTransactions()
+    public async Task<IActionResult> GetTransactions(DateTime? startDate, DateTime? endDate)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -58,8 +58,31 @@ public class TransactionsController(AppDbContext context) : ControllerBase
             return Unauthorized();
         }
 
-        var transactions = await context.GamblingTransactions
+        var query = context.GamblingTransactions
             .Where(x => x.UserId == userId)
+            .AsQueryable();
+
+        if (startDate.HasValue)
+        {
+            var startDateUtc = DateTime.SpecifyKind(
+                startDate.Value,
+                DateTimeKind.Utc
+            );
+
+            query = query.Where(x => x.TransactionDate >= startDateUtc);
+        }
+
+        if (endDate.HasValue)
+        {
+            var endDateUtc = DateTime.SpecifyKind(
+                endDate.Value.Date.AddDays(1),
+                DateTimeKind.Utc
+            );
+
+            query = query.Where(x => x.TransactionDate < endDateUtc);
+        }
+
+        var transactions = await query
             .OrderByDescending(x => x.TransactionDate)
             .Select(x => new TransactionDto
             {
