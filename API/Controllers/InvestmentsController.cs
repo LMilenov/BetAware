@@ -44,6 +44,14 @@ public class InvestmentsController(
     [HttpGet("potential")]
     public async Task<ActionResult<List<InvestmentPotentialDto>>>GetInvestmentPotential(int years = 1)
     {
+        if (years < 1 || years > 50)
+        {
+            return BadRequest(new
+            {
+                message = "Years must be between 1 and 50."
+            });
+        }
+
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(userId))
