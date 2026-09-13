@@ -42,7 +42,7 @@ public class InvestmentsService(AppDbContext context) : IInvestmentsService
             .FirstOrDefaultAsync();
     }
 
-    public async Task<List<InvestmentPotentialDto>>GetInvestmentPotentialAsync(string userId)
+    public async Task<List<InvestmentPotentialDto>>GetInvestmentPotentialAsync(string userId, int years)
     {
         var totalLosses = await context.GamblingTransactions
             .Where(x =>
@@ -60,14 +60,13 @@ public class InvestmentsService(AppDbContext context) : IInvestmentsService
                 ? (int)(totalLosses / x.MinimumAmount)
                 : 0;
 
-            var investedAmount =
-                possibleUnits * x.MinimumAmount;
+            var investedAmount = possibleUnits * x.MinimumAmount;
 
-            var estimatedProfit =
-                investedAmount * x.AnnualReturnRate / 100;
+            var estimatedValue = investedAmount * (decimal)Math.Pow(
+                1 + (double)(x.AnnualReturnRate / 100),
+                years);
 
-            var estimatedValue =
-                investedAmount + estimatedProfit;
+            var estimatedProfit = estimatedValue - investedAmount;
 
             return new InvestmentPotentialDto
             {
@@ -80,7 +79,8 @@ public class InvestmentsService(AppDbContext context) : IInvestmentsService
                 EstimatedProfitAfterOneYear = estimatedProfit,
                 EstimatedValueAfterOneYear = estimatedValue,
                 AnnualReturnRate = x.AnnualReturnRate,
-                Currency = x.Currency
+                Currency = x.Currency,
+                Years = years
             };
         }).ToList();
     }

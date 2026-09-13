@@ -42,7 +42,7 @@ public class InvestmentsController(
     }
 
     [HttpGet("potential")]
-    public async Task<ActionResult<List<InvestmentPotentialDto>>>GetInvestmentPotential()
+    public async Task<ActionResult<List<InvestmentPotentialDto>>>GetInvestmentPotential(int years = 1)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -52,7 +52,7 @@ public class InvestmentsController(
         }
 
         var potential =
-            await investmentsService.GetInvestmentPotentialAsync(userId);
+            await investmentsService.GetInvestmentPotentialAsync(userId, years);
 
         return Ok(potential);
     }
