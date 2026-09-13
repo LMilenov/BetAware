@@ -10,7 +10,8 @@ public interface IDashboardService
         DateTime? startDate = null,
         DateTime? endDate = null,
         TransactionType? type = null,
-        GamblingCategory? category = null);
+        GamblingCategory? category = null,
+        int years = 1);
 
     Task<List<MonthlyStatisticsDto>> GetMonthlyStatisticsAsync(
         string userId);

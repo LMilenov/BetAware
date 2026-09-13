@@ -10,15 +10,22 @@ namespace API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class DashboardController(IDashboardService dashboardService) : ControllerBase
+public class DashboardController(IDashboardService dashboardService)
+    : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetDashboard(
         DateTime? startDate,
         DateTime? endDate,
         TransactionType? type,
-        GamblingCategory? category)
+        GamblingCategory? category,
+        int years = 1)
     {
+        if (years < 1 || years > 50)
+        {
+            return BadRequest("Years must be between 1 and 50.");
+        }
+
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(userId))
@@ -31,7 +38,8 @@ public class DashboardController(IDashboardService dashboardService) : Controlle
             startDate,
             endDate,
             type,
-            category
+            category,
+            years
         );
 
         return Ok(dashboard);

@@ -6,14 +6,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Services;
 
-public class DashboardService(AppDbContext context) : IDashboardService
+public class DashboardService(AppDbContext context, IInvestmentsService investmentsService) : IDashboardService
 {
     public async Task<DashboardDto> GetDashboardAsync(
         string userId,
         DateTime? startDate = null,
         DateTime? endDate = null,
         TransactionType? type = null,
-        GamblingCategory? category = null)
+        GamblingCategory? category = null,
+        int years = 1)
     {
         var query = context.GamblingTransactions
             .Where(x => x.UserId == userId)
@@ -95,6 +96,8 @@ public class DashboardService(AppDbContext context) : IDashboardService
                 2
             )
             : 0;
+        var investmentPotential =
+            await investmentsService.GetInvestmentPotentialAsync(userId, years);
 
         return new DashboardDto
         {
@@ -111,7 +114,9 @@ public class DashboardService(AppDbContext context) : IDashboardService
             AverageLoss = averageLoss,
 
             BiggestWin = biggestWin,
-            BiggestLoss = biggestLoss
+            BiggestLoss = biggestLoss,
+
+            InvestmentPotential = investmentPotential
         };
     }
 

@@ -1,4 +1,7 @@
+using API.DTOs.Investments;
+
 namespace API.DTOs.Dashboard;
+
 
 public class DashboardDto
 {
@@ -23,4 +26,6 @@ public class DashboardDto
     public decimal BiggestWin { get; set; }
 
     public decimal BiggestLoss { get; set; }
+
+    public List<InvestmentPotentialDto> InvestmentPotential { get; set; } = [];
 }
