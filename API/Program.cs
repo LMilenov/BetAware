@@ -26,6 +26,7 @@ builder.Services.AddIdentityCore<AppUser>()
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IAlternativesService, AlternativesService>();
+builder.Services.AddScoped<IInvestmentsService, InvestmentsService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

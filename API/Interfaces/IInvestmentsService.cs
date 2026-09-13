@@ -1,0 +1,10 @@
+using API.DTOs.Investments;
+
+namespace API.Interfaces;
+
+public interface IInvestmentsService
+{
+    Task<List<InvestmentScenarioDto>> GetInvestmentScenariosAsync();
+
+    Task<InvestmentScenarioDto?> GetInvestmentScenarioAsync(int id);
+}
