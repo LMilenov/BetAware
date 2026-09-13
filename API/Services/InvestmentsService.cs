@@ -76,8 +76,8 @@ public class InvestmentsService(AppDbContext context) : IInvestmentsService
                 InvestableAmount = totalLosses,
                 PossibleUnits = possibleUnits,
                 InvestedAmount = investedAmount,
-                EstimatedProfitAfterOneYear = estimatedProfit,
-                EstimatedValueAfterOneYear = estimatedValue,
+                EstimatedProfit = estimatedProfit,
+                EstimatedValue = estimatedValue,
                 AnnualReturnRate = x.AnnualReturnRate,
                 Currency = x.Currency,
                 Years = years

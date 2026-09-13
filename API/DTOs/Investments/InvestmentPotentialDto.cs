@@ -14,9 +14,9 @@ public class InvestmentPotentialDto
 
     public decimal InvestedAmount { get; set; }
 
-    public decimal EstimatedProfitAfterOneYear { get; set; }
+    public decimal EstimatedProfit { get; set; }
 
-    public decimal EstimatedValueAfterOneYear { get; set; }
+    public decimal EstimatedValue { get; set; }
     public int Years { get; set; }
 
     public decimal AnnualReturnRate { get; set; }
