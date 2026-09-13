@@ -9,7 +9,7 @@ namespace API.Services;
 
 public class AlternativesService(AppDbContext context) : IAlternativesService
 {
-    public async Task<List<AlternativeDto>> GetAlternativesAsync(string userId)
+    public async Task<List<AlternativeDto>> GetAlternativesAsync(string userId, string? category = null, string? search = null, decimal? maxPrice = null)
     {
         var totalLost = await context.GamblingTransactions
             .Where(x =>
@@ -17,9 +17,29 @@ public class AlternativesService(AppDbContext context) : IAlternativesService
                 x.Type == TransactionType.Loss)
             .SumAsync(x => x.Amount);
 
-        var alternatives = await context.Alternatives
+        var query = context.Alternatives
             .Where(x => x.IsActive)
-            .ToListAsync();
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(category))
+        {
+            query = query.Where(x =>
+                x.Category.ToLower() == category.ToLower());
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(x =>
+                x.Name.ToLower().Contains(search.ToLower()));
+        }
+
+        if (maxPrice.HasValue)
+        {
+            query = query.Where(x =>
+                x.Price <= maxPrice.Value);
+        }
+
+        var alternatives = await query.ToListAsync();
 
         return alternatives
             .Select(x =>
@@ -47,10 +67,9 @@ public class AlternativesService(AppDbContext context) : IAlternativesService
                     PercentageOfLoss = percentageOfLoss,
                     RemainingAmount = remainingAmount
                 };
-            })
-            .Where(x => x.Quantity > 0)
+                })
             .ToList();
-    }
+            }
 
     public async Task<AlternativeDto> CreateAlternativeAsync(CreateAlternativeDto dto)
     {

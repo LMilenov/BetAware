@@ -12,7 +12,7 @@ namespace API.Controllers;
 public class AlternativesController(IAlternativesService alternativesService) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetAlternatives()
+    public async Task<IActionResult> GetAlternatives(string? category, string? search, decimal? maxPrice)
     {
         var userId = User.FindFirstValue(
             ClaimTypes.NameIdentifier
@@ -23,8 +23,7 @@ public class AlternativesController(IAlternativesService alternativesService) : 
             return Unauthorized();
         }
 
-        var alternatives =
-            await alternativesService.GetAlternativesAsync(userId);
+        var alternatives = await alternativesService.GetAlternativesAsync(userId, category, search, maxPrice);
 
         return Ok(alternatives);
     }
