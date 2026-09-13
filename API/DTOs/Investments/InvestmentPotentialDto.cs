@@ -13,6 +13,7 @@ public class InvestmentPotentialDto
     public int PossibleUnits { get; set; }
 
     public decimal InvestedAmount { get; set; }
+    public decimal UninvestedAmount { get; set; }
 
     public decimal EstimatedProfit { get; set; }
 
