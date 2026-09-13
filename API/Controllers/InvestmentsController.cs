@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using API.DTOs.Investments;
 using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -37,5 +39,21 @@ public class InvestmentsController(
         }
 
         return Ok(scenario);
+    }
+
+    [HttpGet("potential")]
+    public async Task<ActionResult<List<InvestmentPotentialDto>>>GetInvestmentPotential()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        var potential =
+            await investmentsService.GetInvestmentPotentialAsync(userId);
+
+        return Ok(potential);
     }
 }
