@@ -14,7 +14,8 @@ public interface IDashboardService
         int years = 1);
 
     Task<List<MonthlyStatisticsDto>> GetMonthlyStatisticsAsync(
-        string userId);
+        string userId,
+        int year);
 
     Task<List<CategoryStatisticsDto>> GetCategoryStatisticsAsync(
         string userId);

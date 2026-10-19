@@ -120,44 +120,58 @@ public class DashboardService(AppDbContext context, IInvestmentsService investme
         };
     }
 
-    public async Task<List<MonthlyStatisticsDto>> GetMonthlyStatisticsAsync(string userId)
+    public async Task<List<MonthlyStatisticsDto>> GetMonthlyStatisticsAsync(
+    string userId,
+    int year)
     {
         var transactions = await context.GamblingTransactions
-            .Where(x => x.UserId == userId)
+            .Where(x =>
+                x.UserId == userId &&
+                x.TransactionDate.Year == year)
             .ToListAsync();
 
         var statistics = transactions
-            .GroupBy(x => new
-            {
-                x.TransactionDate.Year,
-                x.TransactionDate.Month
-            })
-            .OrderBy(x => x.Key.Year)
-            .ThenBy(x => x.Key.Month)
-            .Select(x => new MonthlyStatisticsDto
-            {
-                Year = x.Key.Year,
-                Month = x.Key.Month,
+            .GroupBy(x => x.TransactionDate.Month)
+            .ToDictionary(
+                x => x.Key,
+                x => new MonthlyStatisticsDto
+                {
+                    Year = year,
+                    Month = x.Key,
 
-                TotalWon = x
-                    .Where(t => t.Type == TransactionType.Win)
-                    .Sum(t => t.Amount),
+                    TotalWon = x
+                        .Where(t => t.Type == TransactionType.Win)
+                        .Sum(t => t.Amount),
 
-                TotalLost = x
-                    .Where(t => t.Type == TransactionType.Loss)
-                    .Sum(t => t.Amount),
+                    TotalLost = x
+                        .Where(t => t.Type == TransactionType.Loss)
+                        .Sum(t => t.Amount),
 
-                NetResult = x
-                    .Where(t => t.Type == TransactionType.Win)
-                    .Sum(t => t.Amount)
-                    -
-                    x.Where(t => t.Type == TransactionType.Loss)
+                    NetResult = x
+                        .Where(t => t.Type == TransactionType.Win)
                         .Sum(t => t.Amount)
-            })
+                        -
+                        x.Where(t => t.Type == TransactionType.Loss)
+                            .Sum(t => t.Amount)
+                });
+
+        var result = Enumerable.Range(1, 12)
+            .Select(month =>
+                statistics.TryGetValue(month, out var monthlyStatistics)
+                    ? monthlyStatistics
+                    : new MonthlyStatisticsDto
+                    {
+                        Year = year,
+                        Month = month,
+                        TotalWon = 0,
+                        TotalLost = 0,
+                        NetResult = 0
+                    })
             .ToList();
 
-        return statistics;
-}   
+        return result;
+    }
+
 
     public async Task<List<CategoryStatisticsDto>> GetCategoryStatisticsAsync(string userId)
     {

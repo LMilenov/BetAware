@@ -46,8 +46,13 @@ public class DashboardController(IDashboardService dashboardService)
     }
 
     [HttpGet("monthly")]
-    public async Task<IActionResult> GetMonthlyStatistics()
+    public async Task<IActionResult> GetMonthlyStatistics(int year = 2026)
     {
+        if (year < 2000 || year > 2100)
+        {
+            return BadRequest("Year must be between 2000 and 2100.");
+        }
+
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(userId))
@@ -56,7 +61,7 @@ public class DashboardController(IDashboardService dashboardService)
         }
 
         var statistics =
-            await dashboardService.GetMonthlyStatisticsAsync(userId);
+            await dashboardService.GetMonthlyStatisticsAsync(userId, year);
 
         return Ok(statistics);
     }
