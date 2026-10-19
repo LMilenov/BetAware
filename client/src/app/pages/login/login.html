@@ -1,0 +1,64 @@
+
+<div class="login-page">
+  <div class="login-card">
+    <a class="brand" routerLink="/">
+      <span class="brand-icon">B</span>
+      <span>Bet<span class="brand-accent">Aware</span></span>
+    </a>
+
+    <div class="heading">
+      <p class="eyebrow">WELCOME BACK</p>
+      <h1>Sign in to BetAware</h1>
+      <p class="subtitle">
+        Take control of your habits and your financial future.
+      </p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input
+          id="email"
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          placeholder="you@example.com"
+          autocomplete="email"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          placeholder="Enter your password"
+          autocomplete="current-password"
+          required
+        />
+      </div>
+
+      @if (error()) {
+        <p class="error-message" role="alert">{{ error() }}</p>
+      }
+
+      <button type="submit" [disabled]="loading() || !loginForm.valid">
+        @if (loading()) {
+          Signing in...
+        } @else {
+          Sign in <span aria-hidden="true">→</span>
+        }
+      </button>
+    </form>
+
+    <p class="register-prompt">
+      Don't have an account?
+      <a routerLink="/register">Create an account</a>
+    </p>
+
+    <a class="back-link" routerLink="/">← Back to dashboard</a>
+  </div>
+</div>
