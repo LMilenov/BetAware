@@ -1,0 +1,206 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/">
+      <span class="brand-icon">B</span>
+      <span>Bet<span class="brand-accent">Aware</span></span>
+    </a>
+
+    <div class="nav-label">WORKSPACE</div>
+
+    <nav class="navigation">
+      <a class="nav-item active" routerLink="/">
+        <span class="nav-icon">▦</span>
+        Dashboard
+      </a>
+      <a class="nav-item" routerLink="/transactions">
+        <span class="nav-icon">↕</span>
+        Transactions
+      </a>
+      <a class="nav-item" routerLink="/alternatives">
+        <span class="nav-icon">◇</span>
+        Alternatives
+      </a>
+      <a class="nav-item" routerLink="/investments">
+        <span class="nav-icon">↗</span>
+        Investments
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="status-indicator"></div>
+      <div>
+        <strong>BetAware</strong>
+        <small>Build better habits</small>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div>
+        <span class="breadcrumb">Workspace /</span>
+        <strong>Dashboard</strong>
+      </div>
+      <div class="topbar-right">
+        <span class="live-indicator"></span>
+        <span>Personal overview</span>
+        <div class="avatar">U</div>
+      </div>
+    </header>
+
+    <section class="page-content">
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">YOUR FINANCIAL WELLBEING</p>
+          <h1>Dashboard</h1>
+          <p class="subtitle">
+            Understand your habits. Take control of your money.
+          </p>
+        </div>
+        <button class="period-button">Last 12 months⌄</button>
+      </div>
+
+      <div class="welcome-banner">
+        <div>
+          <span class="banner-label">A BETTER PERSPECTIVE</span>
+          <h2>Your money can work toward something better.</h2>
+          <p>
+            Track your activity, understand your spending and explore
+            alternatives for your future.
+          </p>
+        </div>
+        <div class="banner-symbol">↗</div>
+      </div>
+
+      <div class="section-heading">
+        <div>
+          <h2>Financial overview</h2>
+          <p>Your recorded gambling activity</p>
+        </div>
+        <span class="demo-badge">UI PREVIEW</span>
+      </div>
+
+
+      <div class="stats-grid">
+        <article class="stat-card">
+          <div class="stat-top">
+            <span>Total won</span>
+            <span class="stat-icon green">↗</span>
+          </div>
+          <div class="stat-value">
+            {{ loading() ? 'Loading...' : (dashboard()?.totalWon ?? 0 | number:'1.2-2') + ' BGN' }}
+          </div>
+          <div class="stat-foot">Recorded winnings</div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-top">
+            <span>Total lost</span>
+            <span class="stat-icon red">↘</span>
+          </div>
+          <div class="stat-value">
+            {{ loading() ? 'Loading...' : (dashboard()?.totalLost ?? 0 | number:'1.2-2') + ' BGN' }}
+          </div>
+          <div class="stat-foot">Recorded losses</div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-top">
+            <span>Net result</span>
+            <span class="stat-icon purple">∑</span>
+          </div>
+          <div class="stat-value">
+            {{ loading() ? 'Loading...' : (dashboard()?.netResult ?? 0 | number:'1.2-2') + ' BGN' }}
+          </div>
+          <div class="stat-foot">Winnings minus losses</div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-top">
+            <span>Win rate</span>
+            <span class="stat-icon blue">%</span>
+          </div>
+          <div class="stat-value">
+            {{ loading() ? 'Loading...' : (dashboard()?.winRate ?? 0) + '%' }}
+          </div>
+          <div class="stat-foot">Share of winning records</div>
+        </article>
+      </div>
+
+      @if (error()) {
+      <div class="panel" role="alert">
+        {{ error() }}
+      </div>
+      }
+
+
+      <div class="content-grid">
+        <article class="panel chart-panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Monthly performance</h2>
+              <p>Wins and losses over time</p>
+            </div>
+            <span class="chart-legend">
+              <span class="legend-dot"></span> Net result
+            </span>
+          </div>
+
+          <div class="empty-chart">
+            <div class="chart-illustration">▥</div>
+            <strong>Your financial story starts here</strong>
+            <p>
+              Once connected to your account, your monthly statistics
+              will appear here.
+            </p>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Quick actions</h2>
+              <p>Keep your records up to date</p>
+            </div>
+          </div>
+
+          <div class="quick-actions">
+            <button class="action-item">
+              <span class="action-icon green">＋</span>
+              <span>
+                <strong>Add transaction</strong>
+                <small>Record a win or loss</small>
+              </span>
+              <span class="action-arrow">→</span>
+            </button>
+
+            <button class="action-item">
+              <span class="action-icon purple">◇</span>
+              <span>
+                <strong>Explore alternatives</strong>
+                <small>See what money could buy</small>
+              </span>
+              <span class="action-arrow">→</span>
+            </button>
+
+            <button class="action-item">
+              <span class="action-icon blue">↗</span>
+              <span>
+                <strong>Investment potential</strong>
+                <small>Explore hypothetical growth</small>
+              </span>
+              <span class="action-arrow">→</span>
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <footer class="page-footer">
+        <span>BetAware · Build better habits.</span>
+        <span>For awareness and informed decisions.</span>
+      </footer>
+    </section>
+  </main>
+</div>
+
+<router-outlet />
