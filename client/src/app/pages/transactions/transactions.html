@@ -1,0 +1,166 @@
+<div class="page">
+    <header class="topbar">
+        <div>
+            <span class="breadcrumb">Workspace /</span>
+            <strong>Transactions</strong>
+        </div>
+        <a class="back-link" routerLink="/">← Dashboard</a>
+    </header>
+
+    <main class="content">
+        <div class="page-heading">
+            <div>
+                <p class="eyebrow">YOUR ACTIVITY</p>
+                <h1>Transactions</h1>
+                <p class="subtitle">
+                    Keep track of your recorded wins and losses.
+                </p>
+            </div>
+            <button type="button" class="add-button" (click)="openForm()">
+                <span>＋</span> Add transaction
+            </button>
+            <div class="total-badge">
+                {{ transactions().length }} records
+            </div>
+        </div>
+
+
+        @if (showForm()) {
+        <section class="panel form-panel">
+            <div class="table-heading">
+                <div>
+                    <h2>New transaction</h2>
+                    <p>Record a gambling win or loss.</p>
+                </div>
+                <button type="button" class="refresh-button" (click)="cancelForm()">
+                    Cancel
+                </button>
+            </div>
+
+            <form class="transaction-form" (ngSubmit)="saveTransaction()" #transactionForm="ngForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="type">Transaction type</label>
+                        <select id="type" name="type" [(ngModel)]="type" required>
+                            <option value="Win">Win</option>
+                            <option value="Loss">Loss</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category" name="category" [(ngModel)]="category" required>
+                            @for (item of categories; track item.value) {
+                            <option [value]="item.value">{{ item.label }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="amount">Amount (BGN)</label>
+                        <input id="amount" name="amount" type="number" [(ngModel)]="amount" min="0.01" step="0.01"
+                            placeholder="e.g. 25.00" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="transactionDate">Transaction date</label>
+                        <input id="transactionDate" name="transactionDate" type="date" [(ngModel)]="transactionDate"
+                            required />
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="note">Note (optional)</label>
+                        <textarea id="note" name="note" [(ngModel)]="note" rows="3" maxlength="500"
+                            placeholder="Add a short note..."></textarea>
+                    </div>
+                </div>
+
+                @if (formError()) {
+                <p class="message error" role="alert">{{ formError() }}</p>
+                }
+
+                <div class="form-actions">
+                    <button type="button" class="refresh-button" (click)="cancelForm()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="add-button" [disabled]="saving() || !transactionForm.valid">
+                        @if (saving()) {
+                        Saving...
+                        } @else {
+                        Save transaction
+                        }
+                    </button>
+                </div>
+            </form>
+        </section>
+        }
+
+
+        @if (error()) {
+        <div class="message error" role="alert">{{ error() }}</div>
+        }
+
+        @if (loading()) {
+        <div class="panel loading">Loading transactions...</div>
+        } @else if (transactions().length === 0 && !error()) {
+        <div class="panel empty-state">
+            <div class="empty-icon">↕</div>
+            <h2>No transactions yet</h2>
+            <p>
+                Your recorded wins and losses will appear here when you add them.
+            </p>
+        </div>
+        } @else if (transactions().length > 0) {
+        <section class="panel">
+            <div class="table-heading">
+                <div>
+                    <h2>All transactions</h2>
+                    <p>Your latest recorded activity</p>
+                </div>
+                <button type="button" class="refresh-button" (click)="loadTransactions()">
+                    ↻ Refresh
+                </button>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th>Date</th>
+                            <th>Note</th>
+                            <th class="amount-column">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (transaction of transactions(); track transaction.id) {
+                        <tr>
+                            <td>
+                                <span class="type-badge" [class.win]="transaction.type === 'Win'"
+                                    [class.loss]="transaction.type === 'Loss'">
+                                    {{ transaction.type }}
+                                </span>
+                            </td>
+                            <td>{{ transaction.category }}</td>
+                            <td>{{ transaction.transactionDate | date:'dd MMM yyyy' }}</td>
+                            <td class="note-cell">{{ transaction.note || '—' }}</td>
+                            <td class="amount-column" [class.positive]="transaction.type === 'Win'"
+                                [class.negative]="transaction.type === 'Loss'">
+                                {{ transaction.type === 'Loss' ? '−' : '+' }}{{ transaction.amount | number:'1.2-2' }}
+                                BGN
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        }
+
+        <footer class="page-footer">
+            <span>BetAware · Build better habits.</span>
+            <span>For awareness and informed decisions.</span>
+        </footer>
+    </main>
+</div>
