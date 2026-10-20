@@ -41,11 +41,27 @@
         <span class="breadcrumb">Workspace /</span>
         <strong>Dashboard</strong>
       </div>
+
       <div class="topbar-right">
         <span class="live-indicator"></span>
-        <span>Personal overview</span>
-        <div class="avatar">U</div>
+
+        <div class="user-profile">
+          <div class="avatar">
+            {{ (userFullName() || userEmail() || 'U').charAt(0).toUpperCase() }}
+          </div>
+
+          <div class="user-details">
+            <span class="user-label">Signed in as</span>
+            <strong>{{ userFullName() || userEmail() || 'Logged-in user' }}</strong>
+          </div>
+        </div>
+
+        <button type="button" class="logout-button" (click)="logout()">
+          <span aria-hidden="true">↪</span>
+          Logout
+        </button>
       </div>
+
     </header>
 
     <section class="page-content">

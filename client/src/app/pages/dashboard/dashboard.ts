@@ -1,8 +1,9 @@
 
 import { DecimalPipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Dashboard as DashboardService, DashboardData } from '../../services/dashboard';
+import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,6 +13,42 @@ import { Dashboard as DashboardService, DashboardData } from '../../services/das
 })
 export class Dashboard implements OnInit {
   private readonly dashboardService = inject(DashboardService);
+
+  private readonly auth = inject(Auth);
+  private readonly router = inject(Router);
+
+  private readonly user = this.getUserFromToken();
+
+  protected readonly userEmail = signal(this.user.email);
+  protected readonly userFullName = signal(this.user.fullName);
+
+  protected logout(): void {
+    this.auth.logout();
+    void this.router.navigateByUrl('/login');
+  }
+
+  private getUserFromToken(): { email: string; fullName: string } {
+    const token = this.auth.getToken();
+
+    if (!token) {
+      return { email: '', fullName: '' };
+    }
+
+    try {
+      const payload = token.split('.')[1];
+      const decoded = JSON.parse(atob(payload));
+
+      return {
+        email:
+          decoded.email ??
+          decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] ??
+          '',
+        fullName: decoded.fullName ?? ''
+      };
+    } catch {
+      return { email: '', fullName: '' };
+    }
+  }
 
   protected readonly dashboard = signal<DashboardData | null>(null);
   protected readonly loading = signal(true);

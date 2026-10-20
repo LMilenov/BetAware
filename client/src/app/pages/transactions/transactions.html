@@ -29,7 +29,7 @@
         <section class="panel form-panel">
             <div class="table-heading">
                 <div>
-                    <h2>New transaction</h2>
+                    <h2>{{ editingId() !== null ? 'Edit transaction' : 'New transaction' }}</h2>
                     <p>Record a gambling win or loss.</p>
                 </div>
                 <button type="button" class="refresh-button" (click)="cancelForm()">
@@ -87,7 +87,7 @@
                         @if (saving()) {
                         Saving...
                         } @else {
-                        Save transaction
+                        {{ saving() ? 'Saving...' : (editingId() !== null ? 'Save changes' : 'Save transaction') }}
                         }
                     </button>
                 </div>
@@ -131,6 +131,7 @@
                             <th>Date</th>
                             <th>Note</th>
                             <th class="amount-column">Amount</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -150,6 +151,15 @@
                                 {{ transaction.type === 'Loss' ? '−' : '+' }}{{ transaction.amount | number:'1.2-2' }}
                                 BGN
                             </td>
+                            <td class="actions-cell">
+                                <button type="button" class="edit-button" (click)="editTransaction(transaction)">
+                                    Edit
+                                </button>
+                                <button type="button" class="delete-button" (click)="deleteTransaction(transaction)">
+                                    Delete
+                                </button>
+                            </td>
+
                         </tr>
                         }
                     </tbody>
@@ -164,3 +174,51 @@
         </footer>
     </main>
 </div>
+
+@if (showDeleteConfirm() && transactionToDelete(); as transaction) {
+  <div class="modal-backdrop" (click)="cancelDelete()">
+    <div
+      class="delete-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-modal-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="delete-modal-icon">!</div>
+
+      <h2 id="delete-modal-title">Delete transaction?</h2>
+
+      <p>
+        Are you sure you want to delete this transaction?
+        This action cannot be undone.
+      </p>
+
+      <div class="delete-transaction-preview">
+        <span>{{ transaction.type }} · {{ transaction.category }}</span>
+        <strong>
+          {{ transaction.amount | number:'1.2-2' }}
+        </strong>
+      </div>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="cancel-button"
+          (click)="cancelDelete()"
+          [disabled]="deleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="confirm-delete-button"
+          (click)="confirmDelete()"
+          [disabled]="deleting()"
+        >
+          {{ deleting() ? 'Deleting...' : 'Delete transaction' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

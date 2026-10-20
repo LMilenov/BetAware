@@ -409,3 +409,244 @@ tbody tr:hover {
   cursor: pointer;
   opacity: 0.8;
 }
+
+
+/* Transaction action buttons */
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-button,
+.delete-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 12px;
+  border: 1px solid #303a44;
+  border-radius: 7px;
+  background: #151d24;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.edit-button {
+  color: #cbd5df;
+}
+
+.edit-button:hover {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+  color: #4ade80;
+}
+
+.delete-button {
+  border-color: rgba(248, 113, 113, 0.25);
+  background: rgba(248, 113, 113, 0.06);
+  color: #fca5a5;
+}
+
+.delete-button:hover {
+  border-color: #f87171;
+  background: rgba(248, 113, 113, 0.14);
+  color: #fecaca;
+}
+
+.edit-button:active,
+.delete-button:active {
+  transform: scale(0.97);
+}
+
+.edit-button:focus-visible,
+.delete-button:focus-visible {
+  outline: 2px solid #4ade80;
+  outline-offset: 2px;
+}
+
+.edit-button:disabled,
+.delete-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+/* Delete confirmation modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(5px);
+  animation: modal-fade-in 0.18s ease-out;
+}
+
+.delete-modal {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 440px;
+  padding: 28px;
+  border: 1px solid #303a44;
+  border-radius: 16px;
+  background: #11171d;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  animation: modal-slide-in 0.2s ease-out;
+}
+
+.delete-modal-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  border-radius: 12px;
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.delete-modal h2 {
+  margin: 0;
+  color: #f2f5f3;
+  font-size: 21px;
+  letter-spacing: -0.4px;
+}
+
+.delete-modal > p {
+  margin: 12px 0 20px;
+  color: #929d96;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.delete-transaction-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid #252f36;
+  border-radius: 10px;
+  background: #0c110f;
+}
+
+.delete-transaction-preview span {
+  color: #cbd5df;
+  font-size: 12px;
+}
+
+.delete-transaction-preview strong {
+  color: #fca5a5;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.cancel-button,
+.confirm-delete-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.cancel-button {
+  border-color: #303a44;
+  background: #151d24;
+  color: #cbd5df;
+}
+
+.cancel-button:hover:not(:disabled) {
+  border-color: #56636e;
+  background: #1b252d;
+}
+
+.confirm-delete-button {
+  border-color: #dc2626;
+  background: #dc2626;
+  color: #fff;
+}
+
+.confirm-delete-button:hover:not(:disabled) {
+  border-color: #ef4444;
+  background: #ef4444;
+}
+
+.cancel-button:active,
+.confirm-delete-button:active {
+  transform: scale(0.98);
+}
+
+.cancel-button:focus-visible,
+.confirm-delete-button:focus-visible {
+  outline: 2px solid #4ade80;
+  outline-offset: 3px;
+}
+
+.cancel-button:disabled,
+.confirm-delete-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .delete-modal {
+    padding: 22px;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancel-button,
+  .confirm-delete-button {
+    width: 100%;
+  }
+}

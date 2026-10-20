@@ -24,6 +24,10 @@ export class Transactions implements OnInit {
 
 
   protected readonly showForm = signal(false);
+  protected readonly showDeleteConfirm = signal(false);
+  protected readonly transactionToDelete = signal<Transaction | null>(null);
+  protected readonly deleting = signal(false);
+  protected readonly editingId = signal<number | null>(null);
   protected readonly saving = signal(false);
   protected readonly formError = signal('');
 
@@ -70,13 +74,69 @@ export class Transactions implements OnInit {
 
   protected openForm(): void {
     this.formError.set('');
+    this.editingId.set(null);
+
+    this.amount = null;
+    this.type = 'Win';
+    this.category = 'SportsBetting';
+    this.transactionDate = new Date().toISOString().slice(0, 10);
+    this.note = '';
+
     this.showForm.set(true);
   }
+
+  protected editTransaction(transaction: Transaction): void {
+    this.formError.set('');
+    this.editingId.set(transaction.id);
+
+    this.amount = transaction.amount;
+    this.type = transaction.type;
+    this.category = transaction.category;
+    this.transactionDate = transaction.transactionDate.slice(0, 10);
+    this.note = transaction.note ?? '';
+
+    this.showForm.set(true);
+  }
+
+  protected deleteTransaction(transaction: Transaction): void {
+  this.transactionToDelete.set(transaction);
+  this.showDeleteConfirm.set(true);
+}
+
+protected cancelDelete(): void {
+  this.showDeleteConfirm.set(false);
+  this.transactionToDelete.set(null);
+}
+
+protected confirmDelete(): void {
+  const transaction = this.transactionToDelete();
+
+  if (!transaction || this.deleting()) {
+    return;
+  }
+
+  this.deleting.set(true);
+
+  this.transactionsService.deleteTransaction(transaction.id).subscribe({
+    next: () => {
+      this.deleting.set(false);
+      this.cancelDelete();
+      this.loadTransactions();
+    },
+    error: (err) => {
+      console.error('Failed to delete transaction:', err);
+      this.deleting.set(false);
+      this.error.set('Unable to delete transaction. Please try again.');
+      this.cancelDelete();
+    }
+  });
+}
 
   protected cancelForm(): void {
     this.showForm.set(false);
     this.formError.set('');
   }
+
 
   protected saveTransaction(): void {
     this.formError.set('');
@@ -101,19 +161,28 @@ export class Transactions implements OnInit {
 
     this.saving.set(true);
 
-    this.transactionsService.createTransaction(request).subscribe({
+    const editingId = this.editingId();
+
+    const operation = editingId !== null
+      ? this.transactionsService.updateTransaction(editingId, request)
+      : this.transactionsService.createTransaction(request);
+
+    operation.subscribe({
       next: () => {
         this.saving.set(false);
         this.showForm.set(false);
+        this.editingId.set(null);
+
         this.amount = null;
         this.type = 'Win';
         this.category = 'SportsBetting';
         this.transactionDate = new Date().toISOString().slice(0, 10);
         this.note = '';
+
         this.loadTransactions();
       },
       error: (err) => {
-        console.error('Failed to create transaction:', err);
+        console.error('Failed to save transaction:', err);
         this.saving.set(false);
         this.formError.set(
           err.error?.message ??
@@ -122,4 +191,5 @@ export class Transactions implements OnInit {
       }
     });
   }
+
 }
