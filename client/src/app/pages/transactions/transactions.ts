@@ -3,6 +3,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../services/toast';
 import {
   TransactionsService,
   Transaction,
@@ -17,6 +18,7 @@ import {
 })
 export class Transactions implements OnInit {
   private readonly transactionsService = inject(TransactionsService);
+  private readonly toastService = inject(ToastService);
 
   protected readonly transactions = signal<Transaction[]>([]);
   protected readonly loading = signal(true);
@@ -99,38 +101,47 @@ export class Transactions implements OnInit {
   }
 
   protected deleteTransaction(transaction: Transaction): void {
-  this.transactionToDelete.set(transaction);
-  this.showDeleteConfirm.set(true);
-}
-
-protected cancelDelete(): void {
-  this.showDeleteConfirm.set(false);
-  this.transactionToDelete.set(null);
-}
-
-protected confirmDelete(): void {
-  const transaction = this.transactionToDelete();
-
-  if (!transaction || this.deleting()) {
-    return;
+    this.transactionToDelete.set(transaction);
+    this.showDeleteConfirm.set(true);
   }
 
-  this.deleting.set(true);
+  protected cancelDelete(): void {
+    this.showDeleteConfirm.set(false);
+    this.transactionToDelete.set(null);
+  }
 
-  this.transactionsService.deleteTransaction(transaction.id).subscribe({
-    next: () => {
-      this.deleting.set(false);
-      this.cancelDelete();
-      this.loadTransactions();
-    },
-    error: (err) => {
-      console.error('Failed to delete transaction:', err);
-      this.deleting.set(false);
-      this.error.set('Unable to delete transaction. Please try again.');
-      this.cancelDelete();
+  protected confirmDelete(): void {
+    const transaction = this.transactionToDelete();
+
+    if (!transaction || this.deleting()) {
+      return;
     }
-  });
-}
+
+    this.deleting.set(true);
+
+    this.transactionsService.deleteTransaction(transaction.id).subscribe({
+      next: () => {
+        this.deleting.set(false);
+        this.cancelDelete();
+        this.loadTransactions();
+
+        this.toastService.success(
+          'The transaction was successfully deleted.',
+          'Transaction deleted'
+        );
+      },
+      error: (err) => {
+        console.error('Failed to delete transaction:', err);
+        this.deleting.set(false);
+        this.cancelDelete();
+
+        this.toastService.error(
+          'Unable to delete the transaction. Please try again.',
+          'Delete failed'
+        );
+      }
+    });
+  }
 
   protected cancelForm(): void {
     this.showForm.set(false);
@@ -167,6 +178,7 @@ protected confirmDelete(): void {
       ? this.transactionsService.updateTransaction(editingId, request)
       : this.transactionsService.createTransaction(request);
 
+
     operation.subscribe({
       next: () => {
         this.saving.set(false);
@@ -180,16 +192,28 @@ protected confirmDelete(): void {
         this.note = '';
 
         this.loadTransactions();
+
+        this.toastService.success(
+          editingId !== null
+            ? 'The transaction was successfully updated.'
+            : 'The transaction was successfully created.',
+          editingId !== null
+            ? 'Transaction updated'
+            : 'Transaction created'
+        );
       },
       error: (err) => {
         console.error('Failed to save transaction:', err);
         this.saving.set(false);
-        this.formError.set(
+
+        this.toastService.error(
           err.error?.message ??
-          'Unable to save transaction. Please try again.'
+          'Unable to save the transaction. Please try again.',
+          'Save failed'
         );
       }
     });
+
   }
 
 }

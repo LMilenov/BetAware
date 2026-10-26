@@ -72,10 +72,6 @@
         <p class="error-message" role="alert">{{ error() }}</p>
       }
 
-      @if (success()) {
-        <p class="success-message" role="status">{{ success() }}</p>
-      }
-
       <button
         type="submit"
         [disabled]="loading() || !registerForm.valid"

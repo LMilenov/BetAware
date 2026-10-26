@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Auth } from '../../services/auth';
+import { ToastService } from '../../services/toast';
 
 @Component({
   selector: 'app-login',
@@ -12,6 +13,7 @@ import { Auth } from '../../services/auth';
 export class Login {
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
 
   protected email = '';
   protected password = '';
@@ -35,6 +37,12 @@ export class Login {
     }).subscribe({
       next: () => {
         this.loading.set(false);
+
+        this.toastService.success(
+          'You have successfully signed in.',
+          'Welcome back!'
+        );
+
         void this.router.navigateByUrl('/');
       },
       error: (err) => {

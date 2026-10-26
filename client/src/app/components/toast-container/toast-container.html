@@ -1,0 +1,35 @@
+
+@if (toast(); as currentToast) {
+  <section
+    class="toast"
+    [class.toast-success]="currentToast.type === 'success'"
+    [class.toast-error]="currentToast.type === 'error'"
+    [class.toast-info]="currentToast.type === 'info'"
+    [attr.role]="currentToast.type === 'error' ? 'alert' : 'status'"
+    aria-live="polite"
+  >
+    <div class="toast-icon" aria-hidden="true">
+      @if (currentToast.type === 'success') {
+        ✓
+      } @else if (currentToast.type === 'error') {
+        !
+      } @else {
+        i
+      }
+    </div>
+
+    <div class="toast-content">
+      <strong>{{ currentToast.title }}</strong>
+      <p>{{ currentToast.message }}</p>
+    </div>
+
+    <button
+      type="button"
+      class="toast-close"
+      aria-label="Dismiss notification"
+      (click)="dismiss()"
+    >
+      ×
+    </button>
+  </section>
+}

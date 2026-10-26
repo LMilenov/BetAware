@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Auth } from '../../services/auth';
+import { ToastService } from '../../services/toast';
 
 @Component({
   selector: 'app-register',
@@ -12,6 +13,7 @@ import { Auth } from '../../services/auth';
 export class Register {
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
 
   protected displayName = '';
   protected email = '';
@@ -20,11 +22,9 @@ export class Register {
 
   protected readonly loading = signal(false);
   protected readonly error = signal('');
-  protected readonly success = signal('');
 
   protected onSubmit(): void {
     this.error.set('');
-    this.success.set('');
 
     if (!this.displayName.trim() || !this.email.trim() || !this.password) {
       this.error.set('Please fill in all required fields.');
@@ -50,19 +50,63 @@ export class Register {
     }).subscribe({
       next: () => {
         this.loading.set(false);
-        this.success.set('Account created successfully! You can now sign in.');
+
+        this.toastService.success(
+          'Your account has been created. You can now sign in.',
+          'Account created'
+        );
+
         setTimeout(() => {
           void this.router.navigateByUrl('/login');
         }, 1200);
       },
+
       error: (err) => {
         this.loading.set(false);
+
+        if (Array.isArray(err.error)) {
+          const identityErrors = err.error as {
+            code?: string;
+            description?: string;
+          }[];
+
+          const messages = identityErrors.map(({ code, description }) => {
+            switch (code) {
+              case 'DuplicateUserName':
+              case 'DuplicateEmail':
+                return 'An account with this email already exists.';
+
+              case 'PasswordTooShort':
+                return description ?? 'Password is too short.';
+
+              case 'PasswordRequiresDigit':
+                return 'Password must contain at least one number.';
+
+              case 'PasswordRequiresLower':
+                return 'Password must contain at least one lowercase letter.';
+
+              case 'PasswordRequiresUpper':
+                return 'Password must contain at least one uppercase letter.';
+
+              case 'PasswordRequiresNonAlphanumeric':
+                return 'Password must contain at least one special character.';
+
+              default:
+                return description ?? 'Unable to create your account. Please try again.';
+            }
+          });
+
+          this.error.set([...new Set(messages)].join(' '));
+          return;
+        }
+
         this.error.set(
           err.error?.message ??
           err.error?.title ??
           'Unable to create your account. Please try again.'
         );
       }
+
     });
   }
 }

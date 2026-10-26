@@ -4,6 +4,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Dashboard as DashboardService, DashboardData } from '../../services/dashboard';
 import { Auth } from '../../services/auth';
+import { ToastService } from '../../services/toast';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,6 +17,7 @@ export class Dashboard implements OnInit {
 
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
 
   private readonly user = this.getUserFromToken();
 
@@ -24,6 +26,12 @@ export class Dashboard implements OnInit {
 
   protected logout(): void {
     this.auth.logout();
+
+    this.toastService.info(
+      'You have successfully signed out of your account.',
+      'Logged out'
+    );
+
     void this.router.navigateByUrl('/login');
   }
 
