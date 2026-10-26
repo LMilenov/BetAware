@@ -1,7 +1,7 @@
 
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../services/toast';
 import {
@@ -18,6 +18,8 @@ import {
 })
 export class Transactions implements OnInit {
   private readonly transactionsService = inject(TransactionsService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly toastService = inject(ToastService);
 
   protected readonly transactions = signal<Transaction[]>([]);
@@ -50,6 +52,17 @@ export class Transactions implements OnInit {
 
   ngOnInit(): void {
     this.loadTransactions();
+
+    if (this.route.snapshot.queryParamMap.get('add') === 'true') {
+      this.openForm();
+
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { add: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true
+      });
+    }
   }
 
   protected loadTransactions(): void {

@@ -1,8 +1,18 @@
 
 import { DecimalPipe } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { Dashboard as DashboardService, DashboardData } from '../../services/dashboard';
+import {
+  Dashboard as DashboardService,
+  DashboardData,
+  MonthlyStatistics
+} from '../../services/dashboard';
 import { Auth } from '../../services/auth';
 import { ToastService } from '../../services/toast';
 
@@ -35,6 +45,12 @@ export class Dashboard implements OnInit {
     void this.router.navigateByUrl('/login');
   }
 
+  protected openAddTransaction(): void {
+    void this.router.navigate(['/transactions'], {
+      queryParams: { add: 'true' }
+    });
+  }
+
   private getUserFromToken(): { email: string; fullName: string } {
     const token = this.auth.getToken();
 
@@ -62,6 +78,42 @@ export class Dashboard implements OnInit {
   protected readonly loading = signal(true);
   protected readonly error = signal('');
 
+  protected readonly monthlyStatistics = signal<MonthlyStatistics[]>([]);
+  protected readonly monthlyLoading = signal(true);
+  protected readonly monthlyError = signal('');
+
+  protected readonly monthLabels = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+
+  protected readonly chartMonths = computed(() => {
+    const statistics = this.monthlyStatistics();
+
+    const maxValue = Math.max(
+      1,
+      ...statistics.flatMap(item => [item.totalWon, item.totalLost])
+    );
+
+    return this.monthLabels.map((label, index) => {
+      const month = index + 1;
+      const item = statistics.find(stat => stat.month === month);
+
+      const totalWon = item?.totalWon ?? 0;
+      const totalLost = item?.totalLost ?? 0;
+
+      return {
+        month,
+        label,
+        totalWon,
+        totalLost,
+        netResult: item?.netResult ?? 0,
+        wonHeight: (totalWon / maxValue) * 100,
+        lostHeight: (totalLost / maxValue) * 100
+      };
+    });
+  });
+
   ngOnInit(): void {
     this.dashboardService.getDashboard(1).subscribe({
       next: (data) => {
@@ -76,6 +128,26 @@ export class Dashboard implements OnInit {
             : 'Unable to load dashboard data. Please try again.'
         );
         this.loading.set(false);
+      }
+    });
+    this.loadMonthlyStatistics(new Date().getFullYear());
+  }
+
+  private loadMonthlyStatistics(year: number): void {
+    this.monthlyLoading.set(true);
+    this.monthlyError.set('');
+
+    this.dashboardService.getMonthlyStatistics(year).subscribe({
+      next: (data) => {
+        this.monthlyStatistics.set(data);
+        this.monthlyLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load monthly statistics:', err);
+        this.monthlyError.set(
+          'Unable to load monthly statistics. Please try again.'
+        );
+        this.monthlyLoading.set(false);
       }
     });
   }

@@ -12,7 +12,7 @@ public class InvestmentScenario
 
     public decimal AnnualReturnRate { get; set; }
 
-    public string Currency { get; set; } = "BGN";
+    public string Currency { get; set; } = "EUR";
 
     public bool IsActive { get; set; } = true;
 }

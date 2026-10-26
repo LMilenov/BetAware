@@ -10,7 +10,7 @@ public class Alternative
 
     public decimal Price { get; set; }
 
-    public string Currency { get; set; } = "BGN";
+    public string Currency { get; set; } = "EUR";
 
     public string? ImageUrl { get; set; }
 

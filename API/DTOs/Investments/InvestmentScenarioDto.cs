@@ -12,5 +12,5 @@ public class InvestmentScenarioDto
 
     public decimal AnnualReturnRate { get; set; }
 
-    public string Currency { get; set; } = "BGN";
+    public string Currency { get; set; } = "EUR";
 }

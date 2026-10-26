@@ -1,0 +1,87 @@
+
+<div class="alternatives-page">
+  <header class="topbar">
+    <a class="brand" routerLink="/">
+      <span class="brand-icon">B</span>
+      <span>Bet<span class="brand-accent">Aware</span></span>
+    </a>
+
+    <a class="back-link" routerLink="/">← Back to Dashboard</a>
+  </header>
+
+  <main class="content">
+    <section class="page-heading">
+      <div>
+        <p class="eyebrow">A DIFFERENT PERSPECTIVE</p>
+        <h1>Explore alternatives</h1>
+        <p class="subtitle">
+          See what your money could make possible beyond gambling.
+        </p>
+      </div>
+    </section>
+
+    @if (loading()) {
+      <div class="panel loading">
+        Loading your financial overview...
+      </div>
+    } @else if (error()) {
+      <div class="panel error-message" role="alert">
+        {{ error() }}
+      </div>
+    } @else {
+      <section class="summary-panel">
+        <div class="summary-icon">↗</div>
+        <div class="summary-copy">
+          <p class="summary-label">YOUR RECORDED LOSSES</p>
+          <h2>{{ dashboard()?.totalLost ?? 0 | number:'1.2-2' }} €</h2>
+          <p>
+            Imagine putting this money toward experiences, skills
+            and things that matter to you.
+          </p>
+        </div>
+      </section>
+
+      <div class="section-heading">
+        <div>
+          <h2>What else could your money do?</h2>
+          <p>Illustrative prices in euros, for inspiration.</p>
+        </div>
+      </div>
+
+      <section class="alternatives-grid">
+        @for (item of alternatives; track item.id) {
+          <article class="alternative-card">
+            <div class="card-top">
+              <div class="alternative-icon">{{ item.icon }}</div>
+              <span class="price">{{ item.price | number:'1.2-2' }} €</span>
+            </div>
+
+            <h3>{{ item.title }}</h3>
+            <p class="description">{{ item.description }}</p>
+
+            <div class="equivalent">
+              <span class="equivalent-number">
+                {{ getEquivalentCount(item.price) }}
+              </span>
+              <span class="equivalent-text">
+                {{ item.unit }}{{ getEquivalentCount(item.price) === 1 ? '' : 's' }}
+                could be covered by your recorded losses
+              </span>
+            </div>
+          </article>
+        }
+      </section>
+
+      <p class="disclaimer">
+        These are illustrative examples, not live market prices or
+        financial advice. The comparisons use your recorded losses
+        and do not imply that those amounts are available to spend.
+      </p>
+    }
+
+    <footer class="page-footer">
+      <span>BetAware · Build better habits.</span>
+      <span>For awareness and informed decisions.</span>
+    </footer>
+  </main>
+</div>

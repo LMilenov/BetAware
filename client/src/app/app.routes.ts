@@ -25,6 +25,20 @@ export const routes: Routes = [
       import('./pages/transactions/transactions').then(m => m.Transactions)
   },
   {
+    path: 'alternatives',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/alternatives/alternatives')
+        .then(m => m.Alternatives)
+  },
+  {
+    path: 'investments',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/investments/investments')
+        .then(m => m.Investments)
+  },
+  {
     path: '**',
     redirectTo: ''
   }

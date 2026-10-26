@@ -104,7 +104,7 @@
             <span class="stat-icon green">↗</span>
           </div>
           <div class="stat-value">
-            {{ loading() ? 'Loading...' : (dashboard()?.totalWon ?? 0 | number:'1.2-2') + ' BGN' }}
+            {{ loading() ? 'Loading...' : (dashboard()?.totalWon ?? 0 | number:'1.2-2') + ' EUR' }}
           </div>
           <div class="stat-foot">Recorded winnings</div>
         </article>
@@ -115,7 +115,7 @@
             <span class="stat-icon red">↘</span>
           </div>
           <div class="stat-value">
-            {{ loading() ? 'Loading...' : (dashboard()?.totalLost ?? 0 | number:'1.2-2') + ' BGN' }}
+            {{ loading() ? 'Loading...' : (dashboard()?.totalLost ?? 0 | number:'1.2-2') + ' EUR' }}
           </div>
           <div class="stat-foot">Recorded losses</div>
         </article>
@@ -126,7 +126,7 @@
             <span class="stat-icon purple">∑</span>
           </div>
           <div class="stat-value">
-            {{ loading() ? 'Loading...' : (dashboard()?.netResult ?? 0 | number:'1.2-2') + ' BGN' }}
+            {{ loading() ? 'Loading...' : (dashboard()?.netResult ?? 0 | number:'1.2-2') + ' EUR' }}
           </div>
           <div class="stat-foot">Winnings minus losses</div>
         </article>
@@ -157,19 +157,52 @@
               <h2>Monthly performance</h2>
               <p>Wins and losses over time</p>
             </div>
-            <span class="chart-legend">
-              <span class="legend-dot"></span> Net result
-            </span>
+            <div class="chart-legend">
+              <span class="chart-legend-item">
+                <span class="legend-dot legend-dot-win"></span>
+                Won
+              </span>
+
+              <span class="chart-legend-item">
+                <span class="legend-dot legend-dot-loss"></span>
+                Lost
+              </span>
+            </div>
           </div>
 
-          <div class="empty-chart">
-            <div class="chart-illustration">▥</div>
-            <strong>Your financial story starts here</strong>
-            <p>
-              Once connected to your account, your monthly statistics
-              will appear here.
-            </p>
+
+          @if (monthlyLoading()) {
+          <div class="chart-state">
+            Loading monthly statistics...
           </div>
+          } @else if (monthlyError()) {
+          <div class="chart-state chart-error" role="alert">
+            {{ monthlyError() }}
+          </div>
+          } @else {
+          <div class="monthly-chart">
+            <div class="chart-bars">
+              @for (month of chartMonths(); track month.month) {
+              <div class="chart-month">
+                <div class="chart-bar-area">
+                  <div class="chart-bar-group">
+                    <div class="chart-bar win-bar" [style.height.%]="month.wonHeight"
+                      [title]="'Won: ' + month.totalWon.toFixed(2) + ' EUR'"></div>
+
+                    <div class="chart-bar loss-bar" [style.height.%]="month.lostHeight"
+                      [title]="'Lost: ' + month.totalLost.toFixed(2) + ' EUR'"></div>
+                  </div>
+                </div>
+
+                <span class="chart-month-label">
+                  {{ month.label }}
+                </span>
+              </div>
+              }
+            </div>
+          </div>
+          }
+
         </article>
 
         <article class="panel">
@@ -181,7 +214,7 @@
           </div>
 
           <div class="quick-actions">
-            <button class="action-item">
+            <button type="button" class="action-item" (click)="openAddTransaction()">
               <span class="action-icon green">＋</span>
               <span>
                 <strong>Add transaction</strong>
@@ -190,7 +223,7 @@
               <span class="action-arrow">→</span>
             </button>
 
-            <button class="action-item">
+            <button type="button" class="action-item" routerLink="/alternatives">
               <span class="action-icon purple">◇</span>
               <span>
                 <strong>Explore alternatives</strong>
@@ -199,7 +232,7 @@
               <span class="action-arrow">→</span>
             </button>
 
-            <button class="action-item">
+            <button type="button" class="action-item" routerLink="/investments">
               <span class="action-icon blue">↗</span>
               <span>
                 <strong>Investment potential</strong>
