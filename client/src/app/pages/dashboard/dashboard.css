@@ -812,3 +812,166 @@ h1 {
 .legend-dot-loss {
   background: #f87171;
 }
+
+
+/* Monthly net result chart */
+.monthly-chart {
+  padding: 18px 20px 12px;
+}
+
+.chart-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #929d96;
+  font-size: 11px;
+}
+
+.legend-dot {
+  display: inline-block;
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legend-dot-win {
+  background: #4ade80;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.25);
+}
+
+.legend-dot-loss {
+  background: #f87171;
+  box-shadow: 0 0 8px rgba(248, 113, 113, 0.2);
+}
+
+.net-chart-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.net-chart {
+  display: block;
+  width: 100%;
+  min-width: 480px;
+  height: auto;
+  overflow: visible;
+}
+
+.net-chart .zero-line {
+  stroke: #46524b;
+  stroke-width: 1.2;
+  stroke-dasharray: 5 5;
+}
+
+.net-chart .positive-segment {
+  stroke: #4ade80;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  fill: none;
+  filter: drop-shadow(0 0 3px rgba(74, 222, 128, 0.12));
+}
+
+.net-chart .negative-segment {
+  stroke: #f87171;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  fill: none;
+  filter: drop-shadow(0 0 3px rgba(248, 113, 113, 0.1));
+}
+
+.net-chart .positive-point {
+  fill: #4ade80;
+  stroke: #11171d;
+  stroke-width: 2;
+}
+
+.net-chart .negative-point {
+  fill: #f87171;
+  stroke: #11171d;
+  stroke-width: 2;
+}
+
+.net-chart .neutral-point {
+  fill: #aeb9b2;
+  stroke: #11171d;
+  stroke-width: 2;
+}
+
+.net-chart .net-chart-label {
+  fill: #83908a;
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.chart-state {
+  display: grid;
+  place-items: center;
+  min-height: 220px;
+  padding: 24px;
+  color: #929d96;
+  font-size: 13px;
+  text-align: center;
+}
+
+.chart-error {
+  color: #fca5a5;
+}
+
+@media (max-width: 600px) {
+  .monthly-chart {
+    padding: 16px 12px 10px;
+  }
+
+  .net-chart {
+    min-width: 480px;
+  }
+
+  .chart-legend {
+    justify-content: flex-start;
+    gap: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .net-chart * {
+    filter: none;
+  }
+}
+
+.net-chart .grid-line {
+  stroke: #29332e;
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+}
+
+.net-chart .zero-line {
+  stroke: #718078;
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.net-chart .axis-label {
+  fill: #929d96;
+  font-family: inherit;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.net-chart .positive-segment {
+  stroke-width: 2.5;
+}
+
+.net-chart .negative-segment {
+  stroke-width: 2.5;
+}

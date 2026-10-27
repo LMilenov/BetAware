@@ -87,32 +87,121 @@ export class Dashboard implements OnInit {
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ];
 
+
   protected readonly chartMonths = computed(() => {
     const statistics = this.monthlyStatistics();
 
-    const maxValue = Math.max(
+    const maxAbsValue = Math.max(
       1,
-      ...statistics.flatMap(item => [item.totalWon, item.totalLost])
+      ...statistics.map(item => Math.abs(item.netResult))
     );
+
+    const width = 720;
+    const left = 78;
+    const right = 750;
+    const centerY = 120;
+    const maxOffset = 85;
 
     return this.monthLabels.map((label, index) => {
       const month = index + 1;
       const item = statistics.find(stat => stat.month === month);
+      const netResult = item?.netResult ?? 0;
 
-      const totalWon = item?.totalWon ?? 0;
-      const totalLost = item?.totalLost ?? 0;
+      const x = left + index * ((right - left) / 11);
+      const y = centerY - (netResult / maxAbsValue) * maxOffset;
 
       return {
         month,
         label,
-        totalWon,
-        totalLost,
-        netResult: item?.netResult ?? 0,
-        wonHeight: (totalWon / maxValue) * 100,
-        lostHeight: (totalLost / maxValue) * 100
+        totalWon: item?.totalWon ?? 0,
+        totalLost: item?.totalLost ?? 0,
+        netResult,
+        x,
+        y
       };
     });
   });
+
+  protected readonly chartAxisTicks = computed(() => {
+    const maxAbsValue = Math.max(
+      1,
+      ...this.monthlyStatistics().map(
+        item => Math.abs(item.netResult)
+      )
+    );
+
+    return [1, 0.5, 0, -0.5, -1].map(factor => ({
+      value: maxAbsValue * factor,
+      y: 120 - factor * 85
+    }));
+  });
+
+  protected readonly chartLinePoints = computed(() =>
+    this.chartMonths()
+      .map(month => `${month.x},${month.y}`)
+      .join(' ')
+  );
+
+
+  protected readonly chartSegments = computed(() => {
+    const months = this.chartMonths();
+    const centerY = 120;
+
+    const segments: {
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+      type: 'positive' | 'negative';
+    }[] = [];
+
+    for (let i = 0; i < months.length - 1; i++) {
+      const from = months[i];
+      const to = months[i + 1];
+
+      const crossesZero =
+        (from.netResult > 0 && to.netResult < 0) ||
+        (from.netResult < 0 && to.netResult > 0);
+
+      if (crossesZero) {
+        const ratio =
+          from.netResult / (from.netResult - to.netResult);
+
+        const crossingX =
+          from.x + (to.x - from.x) * ratio;
+
+        segments.push({
+          x1: from.x,
+          y1: from.y,
+          x2: crossingX,
+          y2: centerY,
+          type: from.netResult > 0 ? 'positive' : 'negative'
+        });
+
+        segments.push({
+          x1: crossingX,
+          y1: centerY,
+          x2: to.x,
+          y2: to.y,
+          type: to.netResult > 0 ? 'positive' : 'negative'
+        });
+      } else {
+        segments.push({
+          x1: from.x,
+          y1: from.y,
+          x2: to.x,
+          y2: to.y,
+          type: (from.netResult + to.netResult) / 2 >= 0
+            ? 'positive'
+            : 'negative'
+        });
+      }
+    }
+
+    return segments;
+  });
+
+
 
   ngOnInit(): void {
     this.dashboardService.getDashboard(1).subscribe({

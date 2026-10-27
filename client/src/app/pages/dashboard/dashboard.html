@@ -158,17 +158,20 @@
               <p>Wins and losses over time</p>
             </div>
             <div class="chart-legend">
-              <span class="chart-legend-item">
-                <span class="legend-dot legend-dot-win"></span>
-                Won
-              </span>
+              <div class="chart-legend">
+                <span class="chart-legend-item">
+                  <span class="legend-dot legend-dot-win"></span>
+                  Positive result
+                </span>
 
-              <span class="chart-legend-item">
-                <span class="legend-dot legend-dot-loss"></span>
-                Lost
-              </span>
+                <span class="chart-legend-item">
+                  <span class="legend-dot legend-dot-loss"></span>
+                  Negative result
+                </span>
+              </div>
             </div>
           </div>
+
 
 
           @if (monthlyLoading()) {
@@ -181,27 +184,42 @@
           </div>
           } @else {
           <div class="monthly-chart">
-            <div class="chart-bars">
-              @for (month of chartMonths(); track month.month) {
-              <div class="chart-month">
-                <div class="chart-bar-area">
-                  <div class="chart-bar-group">
-                    <div class="chart-bar win-bar" [style.height.%]="month.wonHeight"
-                      [title]="'Won: ' + month.totalWon.toFixed(2) + ' EUR'"></div>
 
-                    <div class="chart-bar loss-bar" [style.height.%]="month.lostHeight"
-                      [title]="'Lost: ' + month.totalLost.toFixed(2) + ' EUR'"></div>
-                  </div>
-                </div>
+            <div class="net-chart-wrapper">
+              <svg class="net-chart" viewBox="0 0 780 245" role="img"
+                aria-label="Monthly net result in EUR. Positive results appear above zero and negative results below zero.">
+                @for (tick of chartAxisTicks(); track tick.value) {
+                <line x1="78" [attr.y1]="tick.y" x2="750" [attr.y2]="tick.y" [class.zero-line]="tick.value === 0"
+                  [class.grid-line]="tick.value !== 0" />
 
-                <span class="chart-month-label">
+                <text class="axis-label" x="68" [attr.y]="tick.y + 4" text-anchor="end">
+                  {{ tick.value > 0 ? '+' : '' }}{{ tick.value | number:'1.0-0' }} €
+                </text>
+                }
+
+                @for (segment of chartSegments(); track $index) {
+                <line [attr.x1]="segment.x1" [attr.y1]="segment.y1" [attr.x2]="segment.x2" [attr.y2]="segment.y2"
+                  [class.positive-segment]="segment.type === 'positive'"
+                  [class.negative-segment]="segment.type === 'negative'" />
+                }
+
+                @for (month of chartMonths(); track month.month) {
+                <circle [attr.cx]="month.x" [attr.cy]="month.y" r="4" [class.positive-point]="month.netResult > 0"
+                  [class.negative-point]="month.netResult < 0" [class.neutral-point]="month.netResult === 0">
+                  <title>
+                    {{ month.label }}: {{ month.netResult | number:'1.2-2' }} EUR
+                  </title>
+                </circle>
+
+                <text class="net-chart-label" [attr.x]="month.x" y="235" text-anchor="middle">
                   {{ month.label }}
-                </span>
-              </div>
-              }
+                </text>
+                }
+              </svg>
             </div>
           </div>
           }
+
 
         </article>
 
