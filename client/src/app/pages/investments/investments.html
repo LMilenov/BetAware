@@ -1,13 +1,14 @@
-
 <div class="investments-page">
-  <header class="topbar">
-    <a class="brand" routerLink="/">
-      <span class="brand-icon">B</span>
-      <span>Bet<span class="brand-accent">Aware</span></span>
-    </a>
 
-    <a class="back-link" routerLink="/">← Back to Dashboard</a>
+  <header class="topbar">
+    <div>
+      <span class="breadcrumb">Workspace /</span>
+      <strong>Investments</strong>
+    </div>
+
+    <a class="back-link" routerLink="/">← Dashboard</a>
   </header>
+
 
   <main class="content">
     <section class="page-heading">
@@ -22,118 +23,118 @@
     </section>
 
     @if (loading()) {
-      <section class="panel loading">
-        Loading investment scenarios...
-      </section>
+    <section class="panel loading">
+      Loading investment scenarios...
+    </section>
     } @else if (error()) {
-      <section class="panel error-message" role="alert">
-        {{ error() }}
-      </section>
+    <section class="panel error-message" role="alert">
+      {{ error() }}
+    </section>
     } @else {
-      <section class="summary-panel">
-        <div class="summary-icon">↗</div>
+    <section class="summary-panel">
+      <div class="summary-icon">↗</div>
 
-        <div class="summary-copy">
-          <p class="summary-label">YOUR RECORDED LOSSES</p>
+      <div class="summary-copy">
+        <p class="summary-label">YOUR RECORDED LOSSES</p>
 
-          <h2>
-            {{ dashboard()?.totalLost ?? 0 | number:'1.2-2' }} €
-          </h2>
+        <h2>
+          {{ dashboard()?.totalLost ?? 0 | number:'1.2-2' }} €
+        </h2>
 
-          <p>
-            Explore illustrative scenarios showing how regular saving
-            and investing could contribute to future goals.
-          </p>
-        </div>
-      </section>
-
-      <div class="section-heading">
-        <div>
-          <h2>Investment scenarios</h2>
-          <p>Illustrative projections based on the configured scenarios.</p>
-        </div>
+        <p>
+          Explore illustrative scenarios showing how regular saving
+          and investing could contribute to future goals.
+        </p>
       </div>
+    </section>
 
-      @if ((dashboard()?.investmentPotential?.length ?? 0) === 0) {
-        <section class="empty-state">
-          <div class="empty-icon">◇</div>
-          <h2>No investment scenarios available</h2>
-          <p>
-            Investment scenarios have not been configured yet.
-            Once they are available, their estimated returns will
-            appear here.
-          </p>
-        </section>
-      } @else {
-        <section class="investments-grid">
-          @for (
-            scenario of dashboard()?.investmentPotential ?? [];
-            track scenario.investmentScenarioId
-          ) {
-            <article class="investment-card">
-              <div class="card-heading">
-                <div class="investment-icon">↗</div>
-                <span class="scenario-badge">
-                  {{ scenario.years }}-year scenario
-                </span>
-              </div>
+    <div class="section-heading">
+      <div>
+        <h2>Investment scenarios</h2>
+        <p>Illustrative projections based on the configured scenarios.</p>
+      </div>
+    </div>
 
-              <h3>{{ scenario.investmentName }}</h3>
-
-              <div class="primary-metric">
-                <span>Estimated future value</span>
-                <strong>
-                  {{ scenario.estimatedValue | number:'1.2-2' }}
-                  {{ scenario.currency || 'EUR' }}
-                </strong>
-              </div>
-
-              <div class="metrics-list">
-                <div class="metric-row">
-                  <span>Potential investment</span>
-                  <strong>
-                    {{ scenario.investedAmount | number:'1.2-2' }}
-                    {{ scenario.currency || 'EUR' }}
-                  </strong>
-                </div>
-
-                <div class="metric-row">
-                  <span>Estimated profit</span>
-                  <strong class="positive">
-                    {{ scenario.estimatedProfit | number:'1.2-2' }}
-                    {{ scenario.currency || 'EUR' }}
-                  </strong>
-                </div>
-
-                <div class="metric-row">
-                  <span>Amount not invested</span>
-                  <strong>
-                    {{ scenario.uninvestedAmount | number:'1.2-2' }}
-                    {{ scenario.currency || 'EUR' }}
-                  </strong>
-                </div>
-
-                <div class="metric-row">
-                  <span>Annual return assumption</span>
-                  <strong>
-                    {{ scenario.annualReturnRate | number:'1.1-2' }}%
-                  </strong>
-                </div>
-              </div>
-
-              <div class="scenario-note">
-                Illustrative estimate, not a guaranteed return.
-              </div>
-            </article>
-          }
-        </section>
-      }
-
-      <p class="disclaimer">
-        Investment values are estimates based on the configured
-        scenarios and assumptions. Actual returns may be lower,
-        including negative, and are not guaranteed.
+    @if ((dashboard()?.investmentPotential?.length ?? 0) === 0) {
+    <section class="empty-state">
+      <div class="empty-icon">◇</div>
+      <h2>No investment scenarios available</h2>
+      <p>
+        Investment scenarios have not been configured yet.
+        Once they are available, their estimated returns will
+        appear here.
       </p>
+    </section>
+    } @else {
+    <section class="investments-grid">
+      @for (
+      scenario of dashboard()?.investmentPotential ?? [];
+      track scenario.investmentScenarioId
+      ) {
+      <article class="investment-card">
+        <div class="card-heading">
+          <div class="investment-icon">↗</div>
+          <span class="scenario-badge">
+            {{ scenario.years }}-year scenario
+          </span>
+        </div>
+
+        <h3>{{ scenario.investmentName }}</h3>
+
+        <div class="primary-metric">
+          <span>Estimated future value</span>
+          <strong>
+            {{ scenario.estimatedValue | number:'1.2-2' }}
+            {{ scenario.currency || 'EUR' }}
+          </strong>
+        </div>
+
+        <div class="metrics-list">
+          <div class="metric-row">
+            <span>Potential investment</span>
+            <strong>
+              {{ scenario.investedAmount | number:'1.2-2' }}
+              {{ scenario.currency || 'EUR' }}
+            </strong>
+          </div>
+
+          <div class="metric-row">
+            <span>Estimated profit</span>
+            <strong class="positive">
+              {{ scenario.estimatedProfit | number:'1.2-2' }}
+              {{ scenario.currency || 'EUR' }}
+            </strong>
+          </div>
+
+          <div class="metric-row">
+            <span>Amount not invested</span>
+            <strong>
+              {{ scenario.uninvestedAmount | number:'1.2-2' }}
+              {{ scenario.currency || 'EUR' }}
+            </strong>
+          </div>
+
+          <div class="metric-row">
+            <span>Annual return assumption</span>
+            <strong>
+              {{ scenario.annualReturnRate | number:'1.1-2' }}%
+            </strong>
+          </div>
+        </div>
+
+        <div class="scenario-note">
+          Illustrative estimate, not a guaranteed return.
+        </div>
+      </article>
+      }
+    </section>
+    }
+
+    <p class="disclaimer">
+      Investment values are estimates based on the configured
+      scenarios and assumptions. Actual returns may be lower,
+      including negative, and are not guaranteed.
+    </p>
     }
 
     <footer class="page-footer">

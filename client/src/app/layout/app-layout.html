@@ -1,0 +1,62 @@
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/">
+      <span class="brand-icon">B</span>
+      <span>Bet<span class="brand-accent">Aware</span></span>
+    </a>
+
+    <div class="nav-label">WORKSPACE</div>
+
+    <nav class="navigation" aria-label="Main navigation">
+      <a
+        class="nav-item"
+        routerLink="/"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span class="nav-icon">▦</span>
+        Dashboard
+      </a>
+
+      <a
+        class="nav-item"
+        routerLink="/transactions"
+        routerLinkActive="active"
+      >
+        <span class="nav-icon">↕</span>
+        Transactions
+      </a>
+
+      <a
+        class="nav-item"
+        routerLink="/alternatives"
+        routerLinkActive="active"
+      >
+        <span class="nav-icon">◇</span>
+        Alternatives
+      </a>
+
+      <a
+        class="nav-item"
+        routerLink="/investments"
+        routerLinkActive="active"
+      >
+        <span class="nav-icon">↗</span>
+        Investments
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="status-indicator"></div>
+      <div>
+        <strong>BetAware</strong>
+        <small>Build better habits</small>
+      </div>
+    </div>
+  </aside>
+
+  <main class="layout-main">
+    <router-outlet />
+  </main>
+</div>
