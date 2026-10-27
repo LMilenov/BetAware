@@ -1,5 +1,10 @@
-
-import { Component, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -25,6 +30,76 @@ export class Transactions implements OnInit {
   protected readonly transactions = signal<Transaction[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal('');
+
+
+  protected readonly selectedCategory = signal('All');
+
+  protected readonly filteredTransactions = computed(() => {
+    const category = this.selectedCategory();
+    const records = this.transactions();
+
+    if (category === 'All') {
+      return records;
+    }
+
+    return records.filter(
+      transaction => transaction.category === category
+    );
+  });
+
+
+
+  protected readonly transactionSummary = computed(() => {
+    const records = this.filteredTransactions();
+
+    const totalWon = records
+      .filter(transaction => transaction.type === 'Win')
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+    const totalLost = records
+      .filter(transaction => transaction.type === 'Loss')
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+    return {
+      count: records.length,
+      totalWon,
+      totalLost,
+      netResult: totalWon - totalLost
+    };
+  });
+
+  sortBy = signal<
+    'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc'
+  >('date-desc');
+
+  sortedTransactions = computed(() => {
+    const items = [...this.filteredTransactions()];
+    const sort = this.sortBy();
+
+    return items.sort((a, b) => {
+      switch (sort) {
+        case 'date-asc':
+          return (
+            new Date(a.transactionDate).getTime() -
+            new Date(b.transactionDate).getTime()
+          );
+
+        case 'amount-desc':
+          return Number(b.amount) - Number(a.amount);
+
+        case 'amount-asc':
+          return Number(a.amount) - Number(b.amount);
+
+        case 'date-desc':
+        default:
+          return (
+            new Date(b.transactionDate).getTime() -
+            new Date(a.transactionDate).getTime()
+          );
+      }
+    });
+  });
+
 
 
   protected readonly showForm = signal(false);

@@ -18,5 +18,7 @@ public interface IDashboardService
         int year);
 
     Task<List<CategoryStatisticsDto>> GetCategoryStatisticsAsync(
-        string userId);
+    string userId,
+    DateTime? startDate = null,
+    DateTime? endDate = null);
 }

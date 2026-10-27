@@ -67,7 +67,9 @@ public class DashboardController(IDashboardService dashboardService)
     }
 
     [HttpGet("categories")]
-    public async Task<IActionResult> GetCategoryStatistics()
+    public async Task<IActionResult> GetCategoryStatistics(
+    DateTime? startDate,
+    DateTime? endDate)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -77,7 +79,11 @@ public class DashboardController(IDashboardService dashboardService)
         }
 
         var statistics =
-            await dashboardService.GetCategoryStatisticsAsync(userId);
+            await dashboardService.GetCategoryStatisticsAsync(
+                userId,
+                startDate,
+                endDate
+            );
 
         return Ok(statistics);
     }

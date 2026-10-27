@@ -11,10 +11,12 @@ import { Router, RouterLink } from '@angular/router';
 import {
   Dashboard as DashboardService,
   DashboardData,
-  MonthlyStatistics
+  MonthlyStatistics,
+  CategoryStatistics
 } from '../../services/dashboard';
 import { Auth } from '../../services/auth';
 import { ToastService } from '../../services/toast';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -82,6 +84,113 @@ export class Dashboard implements OnInit {
   protected readonly monthlyLoading = signal(true);
   protected readonly monthlyError = signal('');
 
+  protected readonly selectedPeriod = signal<3 | 6 | 12>(12);
+
+  protected changePeriod(event: Event): void {
+    const value = Number(
+      (event.target as HTMLSelectElement).value
+    );
+
+    if (value !== 3 && value !== 6 && value !== 12) {
+      return;
+    }
+
+    this.selectedPeriod.set(value);
+    this.loadDashboardForSelectedPeriod();
+  }
+
+  protected readonly categoryStatistics = signal<CategoryStatistics[]>([]);
+  protected readonly categoriesLoading = signal(true);
+  protected readonly categoriesError = signal('');
+
+  protected readonly categoryBreakdown = computed(() => {
+    const records = this.categoryStatistics().filter(
+      item => item.totalLost > 0
+    );
+
+    const totalLosses = records.reduce(
+      (sum, item) => sum + item.totalLost,
+      0
+    );
+
+    const categoryInfo: Record<
+      string,
+      { label: string; emoji: string; color: string }
+    > = {
+      SportsBetting: {
+        label: 'Sports Betting',
+        emoji: '⚽',
+        color: '#4ade80'
+      },
+      Slots: {
+        label: 'Slots',
+        emoji: '🎰',
+        color: '#a3e635'
+      },
+      Casino: {
+        label: 'Casino',
+        emoji: '🎲',
+        color: '#a78bfa'
+      },
+      Poker: {
+        label: 'Poker',
+        emoji: '🃏',
+        color: '#60a5fa'
+      },
+      Other: {
+        label: 'Other',
+        emoji: '🎯',
+        color: '#fbbf24'
+      }
+    };
+
+    let offset = 0;
+
+    return records.map(item => {
+      const info = categoryInfo[item.category] ?? {
+        label: item.category,
+        emoji: '🎯',
+        color: '#94a3b8'
+      };
+
+      const percent = totalLosses > 0
+        ? (item.totalLost / totalLosses) * 100
+        : 0;
+
+      const startPercent = offset;
+      offset += percent;
+
+      return {
+        ...item,
+        ...info,
+        percent,
+        startPercent,
+        endPercent: offset
+      };
+    });
+  });
+
+  protected readonly categoryLossTotal = computed(() =>
+    this.categoryBreakdown().reduce(
+      (sum, category) => sum + category.totalLost,
+      0
+    )
+  );
+
+  protected readonly categoryChartBackground = computed(() => {
+    const categories = this.categoryBreakdown();
+
+    if (categories.length === 0) {
+      return 'conic-gradient(#29332e 0% 100%)';
+    }
+
+    const segments = categories.map(category =>
+      `${category.color} ${category.startPercent}% ${category.endPercent}%`
+    );
+
+    return `conic-gradient(from -90deg, ${segments.join(', ')})`;
+  });
+
   protected readonly monthLabels = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
@@ -90,42 +199,60 @@ export class Dashboard implements OnInit {
 
   protected readonly chartMonths = computed(() => {
     const statistics = this.monthlyStatistics();
+    const period = this.selectedPeriod();
+    const now = new Date();
+
+    const selectedMonths = Array.from(
+      { length: period },
+      (_, index) => {
+        const date = new Date(
+          now.getFullYear(),
+          now.getMonth() - (period - 1 - index),
+          1
+        );
+
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+
+        const item = statistics.find(
+          stat => stat.year === year && stat.month === month
+        );
+
+        return {
+          year,
+          month,
+          label: `${this.monthLabels[month - 1]} '${String(year).slice(-2)}`,
+          totalWon: item?.totalWon ?? 0,
+          totalLost: item?.totalLost ?? 0,
+          netResult: item?.netResult ?? 0
+        };
+      }
+    );
 
     const maxAbsValue = Math.max(
       1,
-      ...statistics.map(item => Math.abs(item.netResult))
+      ...selectedMonths.map(item => Math.abs(item.netResult))
     );
 
-    const width = 720;
     const left = 78;
     const right = 750;
     const centerY = 120;
     const maxOffset = 85;
+    const step = period > 1
+      ? (right - left) / (period - 1)
+      : 0;
 
-    return this.monthLabels.map((label, index) => {
-      const month = index + 1;
-      const item = statistics.find(stat => stat.month === month);
-      const netResult = item?.netResult ?? 0;
-
-      const x = left + index * ((right - left) / 11);
-      const y = centerY - (netResult / maxAbsValue) * maxOffset;
-
-      return {
-        month,
-        label,
-        totalWon: item?.totalWon ?? 0,
-        totalLost: item?.totalLost ?? 0,
-        netResult,
-        x,
-        y
-      };
-    });
+    return selectedMonths.map((item, index) => ({
+      ...item,
+      x: left + index * step,
+      y: centerY - (item.netResult / maxAbsValue) * maxOffset
+    }));
   });
 
   protected readonly chartAxisTicks = computed(() => {
     const maxAbsValue = Math.max(
       1,
-      ...this.monthlyStatistics().map(
+      ...this.chartMonths().map(
         item => Math.abs(item.netResult)
       )
     );
@@ -204,40 +331,117 @@ export class Dashboard implements OnInit {
 
 
   ngOnInit(): void {
-    this.dashboardService.getDashboard(1).subscribe({
+    this.loadDashboardForSelectedPeriod();
+    this.loadMonthlyStatistics();
+  }
+
+  private loadDashboardForSelectedPeriod(): void {
+    const now = new Date();
+
+    const startDate = new Date(
+      now.getFullYear(),
+      now.getMonth() - this.selectedPeriod() + 1,
+      1
+    );
+
+    const formatDate = (date: Date): string => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+
+      return `${year}-${month}-${day}`;
+    };
+
+    const startDateString = formatDate(startDate);
+    const endDateString = formatDate(now);
+
+    this.loading.set(true);
+    this.error.set('');
+
+
+    this.loadCategoryStatistics(
+      startDateString,
+      endDateString
+    );
+    this.dashboardService.getDashboard(
+      1,
+      startDateString,
+      endDateString
+    ).subscribe({
       next: (data) => {
         this.dashboard.set(data);
         this.loading.set(false);
       },
       error: (err) => {
         console.error('Failed to load dashboard:', err);
+
         this.error.set(
           err.status === 401
             ? 'Please log in to view your financial overview.'
             : 'Unable to load dashboard data. Please try again.'
         );
+
         this.loading.set(false);
       }
     });
-    this.loadMonthlyStatistics(new Date().getFullYear());
   }
 
-  private loadMonthlyStatistics(year: number): void {
+  private loadMonthlyStatistics(): void {
+    const currentYear = new Date().getFullYear();
+
     this.monthlyLoading.set(true);
     this.monthlyError.set('');
 
-    this.dashboardService.getMonthlyStatistics(year).subscribe({
-      next: (data) => {
-        this.monthlyStatistics.set(data);
+    forkJoin({
+      previous: this.dashboardService.getMonthlyStatistics(
+        currentYear - 1
+      ),
+      current: this.dashboardService.getMonthlyStatistics(
+        currentYear
+      )
+    }).subscribe({
+      next: ({ previous, current }) => {
+        this.monthlyStatistics.set([
+          ...previous,
+          ...current
+        ]);
         this.monthlyLoading.set(false);
       },
       error: (err) => {
         console.error('Failed to load monthly statistics:', err);
+
         this.monthlyError.set(
           'Unable to load monthly statistics. Please try again.'
         );
+
         this.monthlyLoading.set(false);
       }
     });
   }
+
+
+  private loadCategoryStatistics(
+    startDate: string,
+    endDate: string
+  ): void {
+    this.categoriesLoading.set(true);
+    this.categoriesError.set('');
+
+    this.dashboardService
+      .getCategoryStatistics(startDate, endDate)
+      .subscribe({
+        next: (data) => {
+          this.categoryStatistics.set(data);
+          this.categoriesLoading.set(false);
+        },
+        error: (err) => {
+          console.error('Failed to load category statistics:', err);
+          this.categoriesError.set(
+            'Unable to load category statistics. Please try again.'
+          );
+          this.categoriesLoading.set(false);
+        }
+      });
+  }
+
 }

@@ -37,7 +37,12 @@
             Understand your habits. Take control of your money.
           </p>
         </div>
-        <button class="period-button">Last 12 months⌄</button>
+        <select class="period-button" aria-label="Select monthly performance period" [value]="selectedPeriod()"
+          (change)="changePeriod($event)">
+          <option value="3">Last 3 months</option>
+          <option value="6">Last 6 months</option>
+          <option value="12">Last 12 months</option>
+        </select>
       </div>
 
       <div class="welcome-banner">
@@ -225,6 +230,71 @@
           </div>
         </article>
       </div>
+
+      <article class="panel category-panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Losses by Category</h2>
+            <p>Where your recorded losses come from</p>
+          </div>
+        </div>
+
+        @if (categoriesLoading()) {
+        <div class="chart-state">
+          Loading category statistics...
+        </div>
+        } @else if (categoriesError()) {
+        <div class="chart-state chart-error" role="alert">
+          {{ categoriesError() }}
+        </div>
+        } @else if (categoryBreakdown().length === 0) {
+        <div class="chart-state">
+          No recorded losses by category yet.
+        </div>
+        } @else {
+        <div class="category-content">
+          <div class="category-donut" [style.background]="categoryChartBackground()" role="img"
+            aria-label="Donut chart showing the share of recorded losses by category">
+            <div class="donut-center">
+              <span>Total lost</span>
+              <strong>
+                {{ categoryLossTotal() | number:'1.2-2' }} €
+              </strong>
+            </div>
+          </div>
+
+          <div class="category-legend">
+            @for (category of categoryBreakdown(); track category.category) {
+            <div class="category-row">
+              <div class="category-name">
+                <span class="category-color">
+                  {{ category.emoji }}
+                </span>
+
+                <span class="category-label">
+                  {{ category.label }}
+                </span>
+              </div>
+
+              <span class="category-percent">
+                {{ category.percent | number:'1.0-1' }}%
+              </span>
+
+              <div class="category-details">
+                <strong>
+                  {{ category.totalLost | number:'1.2-2' }} €
+                </strong>
+                <span>
+                  {{ category.totalTransactions }}
+                  {{ category.totalTransactions === 1 ? 'record' : 'records' }}
+                </span>
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+        }
+      </article>
 
       <footer class="page-footer">
         <span>BetAware · Build better habits.</span>

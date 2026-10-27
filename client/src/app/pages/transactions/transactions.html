@@ -20,79 +20,141 @@
                 <span>＋</span> Add transaction
             </button>
             <div class="total-badge">
-                {{ transactions().length }} records
+                {{ filteredTransactions().length }} records
             </div>
         </div>
 
 
-        @if (showForm()) {
-        <section class="panel form-panel">
-            <div class="table-heading">
-                <div>
-                    <h2>{{ editingId() !== null ? 'Edit transaction' : 'New transaction' }}</h2>
-                    <p>Record a gambling win or loss.</p>
-                </div>
-                <button type="button" class="refresh-button" (click)="cancelForm()">
-                    Cancel
+        <section class="transaction-overview">
+            <div class="transaction-filters">
+                <button type="button" class="filter-chip" [class.active]="selectedCategory() === 'All'"
+                    (click)="selectedCategory.set('All')">
+                    All categories
                 </button>
+
+                @for (item of categories; track item.value) {
+                <button type="button" class="filter-chip" [class.active]="selectedCategory() === item.value"
+                    (click)="selectedCategory.set(item.value)">
+                    {{ item.label }}
+                </button>
+                }
             </div>
 
-            <form class="transaction-form" (ngSubmit)="saveTransaction()" #transactionForm="ngForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="type">Transaction type</label>
-                        <select id="type" name="type" [(ngModel)]="type" required>
-                            <option value="Win">Win</option>
-                            <option value="Loss">Loss</option>
-                        </select>
+            <div class="transaction-summary">
+                <article class="summary-card">
+                    <span class="summary-label">Transactions</span>
+                    <strong>{{ transactionSummary().count }}</strong>
+                </article>
+
+                <article class="summary-card">
+                    <span class="summary-label">Total won</span>
+                    <strong class="positive">
+                        {{ transactionSummary().totalWon | number:'1.2-2' }} €
+                    </strong>
+                </article>
+
+                <article class="summary-card">
+                    <span class="summary-label">Total lost</span>
+                    <strong class="negative">
+                        {{ transactionSummary().totalLost | number:'1.2-2' }} €
+                    </strong>
+                </article>
+
+                <article class="summary-card">
+                    <span class="summary-label">Net result</span>
+                    <strong [class.positive]="transactionSummary().netResult >= 0"
+                        [class.negative]="transactionSummary().netResult < 0">
+                        {{ transactionSummary().netResult | number:'1.2-2' }} €
+                    </strong>
+                </article>
+            </div>
+            <div class="transaction-toolbar">
+                <label for="transaction-sort">Sort by</label>
+
+                <select id="transaction-sort" [value]="sortBy()" (change)="sortBy.set($any($event.target).value)">
+                    <option value="date-desc">Newest first</option>
+                    <option value="date-asc">Oldest first</option>
+                    <option value="amount-desc">Highest amount</option>
+                    <option value="amount-asc">Lowest amount</option>
+                </select>
+            </div>
+        </section>
+
+
+
+        @if (showForm()) {
+        <div class="modal-backdrop form-modal-backdrop" (click)="cancelForm()">
+            <section class="panel form-panel transaction-modal" role="dialog" aria-modal="true"
+                aria-labelledby="transaction-form-title" (click)="$event.stopPropagation()">
+                <div class="table-heading">
+                    <div>
+                        <h2 id="transaction-form-title">
+                            {{ editingId() !== null ? 'Edit transaction' : 'New transaction' }}
+                        </h2>
+                        <p>Record a gambling win or loss.</p>
                     </div>
-
-                    <div class="form-group">
-                        <label for="category">Category</label>
-                        <select id="category" name="category" [(ngModel)]="category" required>
-                            @for (item of categories; track item.value) {
-                            <option [value]="item.value">{{ item.label }}</option>
-                            }
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="amount">Amount (EUR)</label>
-                        <input id="amount" name="amount" type="number" [(ngModel)]="amount" min="0.01" step="0.01"
-                            placeholder="e.g. 25.00" required />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="transactionDate">Transaction date</label>
-                        <input id="transactionDate" name="transactionDate" type="date" [(ngModel)]="transactionDate"
-                            required />
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label for="note">Note (optional)</label>
-                        <textarea id="note" name="note" [(ngModel)]="note" rows="3" maxlength="500"
-                            placeholder="Add a short note..."></textarea>
-                    </div>
-                </div>
-
-                @if (formError()) {
-                <p class="message error" role="alert">{{ formError() }}</p>
-                }
-
-                <div class="form-actions">
                     <button type="button" class="refresh-button" (click)="cancelForm()">
                         Cancel
                     </button>
-                    <button type="submit" class="add-button" [disabled]="saving() || !transactionForm.valid">
-                        @if (saving()) {
-                        Saving...
-                        } @else {
-                        {{ saving() ? 'Saving...' : (editingId() !== null ? 'Save changes' : 'Save transaction') }}
-                        }
-                    </button>
                 </div>
-            </form>
-        </section>
+
+                <form class="transaction-form" (ngSubmit)="saveTransaction()" #transactionForm="ngForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="type">Transaction type</label>
+                            <select id="type" name="type" [(ngModel)]="type" required>
+                                <option value="Win">Win</option>
+                                <option value="Loss">Loss</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" name="category" [(ngModel)]="category" required>
+                                @for (item of categories; track item.value) {
+                                <option [value]="item.value">{{ item.label }}</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="amount">Amount (EUR)</label>
+                            <input id="amount" name="amount" type="number" [(ngModel)]="amount" min="0.01" step="0.01"
+                                placeholder="e.g. 25.00" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="transactionDate">Transaction date</label>
+                            <input id="transactionDate" name="transactionDate" type="date" [(ngModel)]="transactionDate"
+                                required />
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="note">Note (optional)</label>
+                            <textarea id="note" name="note" [(ngModel)]="note" rows="3" maxlength="500"
+                                placeholder="Add a short note..."></textarea>
+                        </div>
+                    </div>
+
+                    @if (formError()) {
+                    <p class="message error" role="alert">{{ formError() }}</p>
+                    }
+
+                    <div class="form-actions">
+                        <button type="button" class="refresh-button" (click)="cancelForm()">
+                            Cancel
+                        </button>
+                        <button type="submit" class="add-button" [disabled]="saving() || !transactionForm.valid">
+                            @if (saving()) {
+                            Saving...
+                            } @else {
+                            {{ saving() ? 'Saving...' : (editingId() !== null ? 'Save changes' : 'Save transaction') }}
+                            }
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </div>
         }
 
 
@@ -114,7 +176,11 @@
         <section class="panel">
             <div class="table-heading">
                 <div>
-                    <h2>All transactions</h2>
+                    <h2>
+                        {{ selectedCategory() === 'All'
+                        ? 'All transactions'
+                        : 'Filtered transactions' }}
+                    </h2>
                     <p>Your latest recorded activity</p>
                 </div>
                 <button type="button" class="refresh-button" (click)="loadTransactions()">
@@ -135,7 +201,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @for (transaction of transactions(); track transaction.id) {
+                        @for (transaction of sortedTransactions(); track transaction.id) {
                         <tr>
                             <td>
                                 <span class="type-badge" [class.win]="transaction.type === 'Win'"
@@ -153,7 +219,8 @@
                             <td class="note-cell">{{ transaction.note || '—' }}</td>
                             <td class="amount-column" [class.positive]="transaction.type === 'Win'"
                                 [class.negative]="transaction.type === 'Loss'">
-                                {{ transaction.type === 'Loss' ? '−' : '+' }}{{ transaction.amount | number:'1.2-2' }}
+                                {{ transaction.type === 'Loss' ? '−' : '+' }}{{ transaction.amount | number:'1.2-2'
+                                }}
                                 EUR
                             </td>
                             <td class="actions-cell">

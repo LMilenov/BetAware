@@ -56,8 +56,20 @@ export class Dashboard {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = 'http://localhost:5194/api/Dashboard';
 
-  getDashboard(years = 1): Observable<DashboardData> {
-    const params = new HttpParams().set('years', years);
+  getDashboard(
+    years = 1,
+    startDate?: string,
+    endDate?: string
+  ): Observable<DashboardData> {
+    let params = new HttpParams().set('years', years);
+
+    if (startDate) {
+      params = params.set('startDate', startDate);
+    }
+
+    if (endDate) {
+      params = params.set('endDate', endDate);
+    }
 
     return this.http.get<DashboardData>(this.apiUrl, { params });
   }
@@ -71,9 +83,23 @@ export class Dashboard {
     );
   }
 
-  getCategoryStatistics(): Observable<CategoryStatistics[]> {
+  getCategoryStatistics(
+    startDate?: string,
+    endDate?: string
+  ): Observable<CategoryStatistics[]> {
+    let params = new HttpParams();
+
+    if (startDate) {
+      params = params.set('startDate', startDate);
+    }
+
+    if (endDate) {
+      params = params.set('endDate', endDate);
+    }
+
     return this.http.get<CategoryStatistics[]>(
-      `${this.apiUrl}/categories`
+      `${this.apiUrl}/categories`,
+      { params }
     );
   }
 }

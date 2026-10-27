@@ -173,18 +173,46 @@ public class DashboardService(AppDbContext context, IInvestmentsService investme
     }
 
 
-    public async Task<List<CategoryStatisticsDto>> GetCategoryStatisticsAsync(string userId)
+    public async Task<List<CategoryStatisticsDto>> GetCategoryStatisticsAsync(
+     string userId,
+     DateTime? startDate = null,
+     DateTime? endDate = null)
     {
-        var transactions = await context.GamblingTransactions
+        var query = context.GamblingTransactions
             .Where(x => x.UserId == userId)
-            .ToListAsync();
+            .AsQueryable();
 
-        var statistics = transactions
+        if (startDate.HasValue)
+        {
+            var startDateUtc = DateTime.SpecifyKind(
+                startDate.Value,
+                DateTimeKind.Utc
+            );
+
+            query = query.Where(
+                x => x.TransactionDate >= startDateUtc
+            );
+        }
+
+        if (endDate.HasValue)
+        {
+            var endDateUtc = DateTime.SpecifyKind(
+                endDate.Value.Date.AddDays(1),
+                DateTimeKind.Utc
+            );
+
+            query = query.Where(
+                x => x.TransactionDate < endDateUtc
+            );
+        }
+
+        var transactions = await query.ToListAsync();
+
+        return transactions
             .GroupBy(x => x.Category)
             .Select(x => new CategoryStatisticsDto
             {
                 Category = x.Key,
-
                 TotalTransactions = x.Count(),
 
                 TotalWon = x
@@ -204,7 +232,5 @@ public class DashboardService(AppDbContext context, IInvestmentsService investme
             })
             .OrderByDescending(x => x.TotalLost)
             .ToList();
-
-        return statistics;
     }
 }

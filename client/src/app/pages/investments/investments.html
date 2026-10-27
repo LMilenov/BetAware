@@ -85,7 +85,7 @@
           <span>Estimated future value</span>
           <strong>
             {{ scenario.estimatedValue | number:'1.2-2' }}
-            {{ scenario.currency || 'EUR' }}
+            €
           </strong>
         </div>
 
@@ -94,7 +94,7 @@
             <span>Potential investment</span>
             <strong>
               {{ scenario.investedAmount | number:'1.2-2' }}
-              {{ scenario.currency || 'EUR' }}
+              €
             </strong>
           </div>
 
@@ -102,7 +102,7 @@
             <span>Estimated profit</span>
             <strong class="positive">
               {{ scenario.estimatedProfit | number:'1.2-2' }}
-              {{ scenario.currency || 'EUR' }}
+              €
             </strong>
           </div>
 
@@ -110,7 +110,7 @@
             <span>Amount not invested</span>
             <strong>
               {{ scenario.uninvestedAmount | number:'1.2-2' }}
-              {{ scenario.currency || 'EUR' }}
+              €
             </strong>
           </div>
 
