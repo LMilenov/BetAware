@@ -42,11 +42,11 @@ export class Transactions implements OnInit {
   protected note = '';
 
   protected readonly categories = [
-    { value: 'SportsBetting', label: 'Sports Betting' },
-    { value: 'Casino', label: 'Casino' },
-    { value: 'Slots', label: 'Slots' },
-    { value: 'Poker', label: 'Poker' },
-    { value: 'Other', label: 'Other' }
+    { value: 'SportsBetting', label: '⚽ Sports Betting' },
+    { value: 'Casino', label: '🎲 Casino' },
+    { value: 'Slots', label: '🎰 Slots' },
+    { value: 'Poker', label: '🃏 Poker' },
+    { value: 'Other', label: '🎯 Other' }
   ];
 
 
@@ -99,6 +99,23 @@ export class Transactions implements OnInit {
 
     this.showForm.set(true);
   }
+
+
+  protected getCategoryEmoji(category: string): string {
+    switch (category) {
+      case 'SportsBetting':
+        return '⚽';
+      case 'Casino':
+        return '🎲';
+      case 'Slots':
+        return '🎰';
+      case 'Poker':
+        return '🃏';
+      default:
+        return '🎯';
+    }
+  }
+
 
   protected editTransaction(transaction: Transaction): void {
     this.formError.set('');

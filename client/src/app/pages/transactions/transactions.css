@@ -650,3 +650,23 @@ tbody tr:hover {
     width: 100%;
   }
 }
+
+
+.category-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.category-emoji {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  border: 1px solid #303a44;
+  border-radius: 8px;
+  background: #151d24;
+  font-size: 15px;
+  line-height: 1;
+}
