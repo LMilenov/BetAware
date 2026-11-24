@@ -85,6 +85,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
 
     await IdentitySeeder.SeedAsync(services, builder.Configuration);
+    await InvestmentScenarioSeeder.SeedAsync(services);
 }
 
 // Configure the HTTP request pipeline
