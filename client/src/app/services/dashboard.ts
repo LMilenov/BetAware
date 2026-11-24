@@ -2,6 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface DashboardData {
   totalTransactions: number;
@@ -54,7 +55,7 @@ export interface CategoryStatistics {
 })
 export class Dashboard {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:5194/api/Dashboard';
+  private readonly apiUrl = `${environment.apiUrl}/Dashboard`;
 
   getDashboard(
     years = 1,

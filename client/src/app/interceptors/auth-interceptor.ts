@@ -1,5 +1,6 @@
 
 import { HttpInterceptorFn } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (typeof localStorage === 'undefined') {
@@ -8,7 +9,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   const token = localStorage.getItem('betaware_token');
 
-  if (!token || !req.url.startsWith('http://localhost:5194/api/')) {
+  if (!token || !req.url.startsWith(environment.apiUrl + '/')) {
     return next(req);
   }
 

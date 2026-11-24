@@ -2,6 +2,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface LoginRequest {
   email: string;
@@ -23,7 +24,7 @@ interface AuthResponse {
 })
 export class Auth {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:5194/api/Account';
+  private readonly apiUrl = `${environment.apiUrl}/Account`;
 
   readonly isLoggedIn = signal(
     typeof localStorage !== 'undefined' &&

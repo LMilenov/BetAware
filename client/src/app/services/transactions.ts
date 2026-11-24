@@ -2,6 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Transaction {
   id: number;
@@ -27,7 +28,7 @@ export interface CreateTransactionRequest {
 })
 export class TransactionsService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:5194/api/Transactions';
+  private readonly apiUrl = `${environment.apiUrl}/Transactions`;
 
   getTransactions(): Observable<Transaction[]> {
     return this.http.get<Transaction[]>(this.apiUrl);
